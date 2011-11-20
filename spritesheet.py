@@ -31,6 +31,7 @@ class SpriteSheet(object):
         return self.images_at(tups, colorkey)
 
     def split(self):
+        self.sprites = []
         _, _, width, height = self.sheet.get_rect()
         rows = []
 
@@ -88,11 +89,26 @@ class SpriteSheet(object):
         self.rows = rows
         self.columns = columns
 
+    def debug(self, desired_width, desired_height):
+        ret = self.sheet.copy()
+        _, _, width, height = ret.get_rect()
+        debug_color = (0, 0, 0, 255)
+
+        for row in self.rows:
+            for x in xrange(width):
+                ret.set_at((x, row[0]), debug_color)
+                ret.set_at((x, row[0] + row[1]), debug_color)
+
+        for column in self.columns:
+            for y in xrange(height):
+                ret.set_at((column[0], y), debug_color)
+                ret.set_at((column[0] + column[1], y), debug_color)
+
+        return pygame.transform.scale(ret, (desired_width, desired_height))
+
     def get_item(self, row, column, desired_width, desired_height):
         x, y = self.rows[row][0], self.columns[column][0]
         width, height = self.rows[row][1], self.columns[column][1]
-
-        print 
 
         unscaled_image = self.image_at((x, y, width, height))
         return pygame.transform.scale(unscaled_image, (desired_width, desired_height))
