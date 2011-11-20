@@ -56,9 +56,9 @@ while game_on:
         if event.type == pygame.KEYDOWN:
             key = event.dict['key']
             keys_down.add(key)
+
             if key == 273:
                 #Up key
-                #screen.walking_up()
                 screen.walking_up()
             if key == 276:
                 #Left
@@ -75,10 +75,9 @@ while game_on:
             if key in keys_down:
                 keys_down.remove(key)
 
-            if event.dict['key'] in (273, 274, 275, 276) and \
-                    len(keys_down.intersection((273, 274, 275, 276))) == 0:
-                #Any array key
-                screen.stop_walking()
+    if len(keys_down.intersection((273, 274, 275, 276))) == 0:
+        #Any array key
+        screen.stop_walking()
 
     screen.draw()
     clock.tick(tiled_screen.FPS)

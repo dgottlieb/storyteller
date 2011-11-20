@@ -21,6 +21,8 @@ class Screen(object):
                           tile_width, tile_height)
 
         self.motioning = False
+        self._next = None
+
         self.row_offset = 0
         self.col_offset = 0
 
@@ -57,18 +59,34 @@ class Screen(object):
         self.moving_cols = col_change
 
     def walking_up(self):
+        if self.motioning:
+            self._next = self.walking_up
+            return
+
         self.moving(1, 0)
         self._hero_orientation = self.hero_up
 
     def walking_down(self):
+        if self.motioning:
+            self._next = self.walking_down
+            return
+
         self.moving(-1, 0)
         self._hero_orientation = self.hero_down
 
     def walking_left(self):
+        if self.motioning:
+            self._next = self.walking_left
+            return
+
         self.moving(0, 1)
         self._hero_orientation = self.hero_left
 
     def walking_right(self):
+        if self.motioning:
+            self._next = self.walking_right
+            return
+
         self.moving(0, -1)
         self._hero_orientation = self.hero_right
 
@@ -104,6 +122,12 @@ class Screen(object):
             self.row_offset = int(self.moving_rows * self.tile_height * perc_change)
             self.col_offset = int(self.moving_cols * self.tile_width * perc_change)
         else:
+            if self._next:
+                self.motioning = False
+                self._next()
+                self._next = None
+                return
+
             if self.stop_moving:
                 #button was let go, stop motioning
                 self.row_offset = 0
