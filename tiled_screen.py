@@ -166,30 +166,30 @@ class Screen(object):
         if perc_change < 1.0:
             self.row_offset = int(self.moving_rows * self.tile_height * perc_change)
             self.col_offset = int(self.moving_cols * self.tile_width * perc_change)
+            return;
+
+        #We finished moving a spot, update the position
+        self.row_offset = 0
+        self.col_offset = 0
+        self.hero_pos[0] += self.moving_rows
+        self.hero_pos[1] += self.moving_cols
+
+        #and update the slice of the map
+        self.update_grid()            
+
+        if self._next:
+            #Was another move queued up? If so, execute it
+            self.motioning = False
+            self._next()
+            self._next = None
+            return
+
+        if self.stop_moving:
+            #button was let go, stop motioning
+            self.motioning = False
         else:
-            self.update_grid()
-
-            #We finished moving a spot, update the position
-            self.hero_pos[0] += self.moving_rows
-            self.hero_pos[1] += self.moving_cols
-
-            #and update the slice of the map
-
-            if self._next:
-                #Was another move queued up? If so, execute it
-                self.motioning = False
-                self._next()
-                self._next = None
-                return
-
-            if self.stop_moving:
-                #button was let go, stop motioning
-                self.row_offset = 0
-                self.col_offset = 0
-                self.motioning = False
-            else:
-                #button is still held down, let's keep moving
-                self.moving(self.moving_rows, self.moving_cols)
+            #button is still held down, let's keep moving
+            self.moving(self.moving_rows, self.moving_cols)
 
     def draw(self):
         self.screen.fill(black)
