@@ -17,8 +17,8 @@ MPS = 2
 
 screen = tiled_screen.Screen(rows=12, columns=12, tile_width=64, tile_height=64)
 
-chars_sheet = spritesheet.SpriteSheet("clean_chars.png", background_color=(135, 191, 255, 255))
-tiles_sheet = spritesheet.SpriteSheet("tiles.png", background_color=(0, 128, 128, 255))
+chars_sheet = spritesheet.SpriteSheet("images/chars.png", background_color=(135, 191, 255, 255))
+tiles_sheet = spritesheet.SpriteSheet("images/tiles.png", background_color=(0, 128, 128, 255))
 
 hero = [chars_sheet.get_item(1, x, 64, 64, transparent=True) for x in range(8)]
 hero_rect = hero[0].get_rect()
