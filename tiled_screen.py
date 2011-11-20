@@ -167,12 +167,13 @@ class Screen(object):
             self.row_offset = int(self.moving_rows * self.tile_height * perc_change)
             self.col_offset = int(self.moving_cols * self.tile_width * perc_change)
         else:
+            self.update_grid()
+
             #We finished moving a spot, update the position
             self.hero_pos[0] += self.moving_rows
             self.hero_pos[1] += self.moving_cols
 
             #and update the slice of the map
-            self.update_grid()
 
             if self._next:
                 #Was another move queued up? If so, execute it
