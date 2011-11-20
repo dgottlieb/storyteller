@@ -13,20 +13,25 @@ class Screen(object):
         self.tile_map = {}
 
         self.grid = [[None for y in range(self.columns)] for x in range(self.rows)]
-        self.map = ['WWWWWWWWWWWWWW',
-                    'WBBBBBBBBBBBBW',
-                    'WWWWWWWWWWWWWW']
+        self.map_one = ['WWWWWWWWWWWWWW',
+                        'WBBBBBBBBBBBBW',
+                        'WBBBBBBBBBBBBW',
+                        'WBBBBBBBBBBBBW',
+                        'WBBBBBBBBBBBBW',
+                        'WBBBBBBBBBBBBW',
+                        'WBBBBBBBBBBBBW',
+                        'WBBBBBBBBBBBBW',
+                        'WBBBBBBBBBBBBW',
+                        'WBBBBBBBBBBBDW',
+                        'WWWWWWWWWWWWWW']
 
-        """
-                    'WBBBBBBBBBBBBW',
-                    'WBBBBBBBBBBBBW',
-                    'WBBBBBBBBBBBBW',
-                    'WBBBBBBBBBBBBW',
-                    'WBBBBBBBBBBBBW',
-                    'WBBBBBBBBBBBBW',
-                    'WBBBBBBBBBBBBW',
-                    'WBBBBBBBBBBBBW',
-                    """
+        self.map_two = ["WWW",
+                        "WUWWWW",
+                        "WBBBBW",
+                        "WBBBBW",
+                        "WWWWWW"]
+
+        self.map = self.map_one
 
         self.hero_pos = [1, 2]
 
@@ -48,16 +53,15 @@ class Screen(object):
     @property
     def size(self):
         return (self.width, self.height)
-    
-    """
-    def tile(self, tile):
-        for row in self.grid:
-            for y in range(len(row)):
-                row[y] = tile
-                """
 
     def set_tile(self, char, surface):
         self.tile_map[char] = surface
+
+    def set_bump_sound(self, bump_sound):
+        self.bump_sound = bump_sound
+
+    def set_stair_sound(self, stair_sound):
+        self.stair_sound = stair_sound
 
     def update_grid(self):
         hero_row = self.hero_pos[0]
@@ -91,6 +95,16 @@ class Screen(object):
         self.hero_right = hero_right_animations
 
     def moving(self, row_change, col_change):
+        new_row = self.hero_pos[0] + row_change
+        new_col = self.hero_pos[1] + col_change
+        if self.map[new_row][new_col] == 'W':
+            self.bump_sound.play()
+            self.stop_walking()
+            self.motioning = False
+            return
+
+        self.bump_sound.stop()
+
         self.motioning = True
         self.stop_moving = False
 
@@ -174,6 +188,9 @@ class Screen(object):
         self.hero_pos[0] += self.moving_rows
         self.hero_pos[1] += self.moving_cols
 
+        #take actions for the new spot
+        self.take_actions()
+
         #and update the slice of the map
         self.update_grid()            
 
@@ -190,6 +207,19 @@ class Screen(object):
         else:
             #button is still held down, let's keep moving
             self.moving(self.moving_rows, self.moving_cols)
+
+    def take_actions(self):
+        if self.map == self.map_one and self.hero_pos == [9, 12]:
+            self.stair_sound.play()
+            self.map = self.map_two
+            self.hero_pos = [1, 1]
+            return
+
+        if self.map == self.map_two and self.hero_pos == [1, 1]:
+            self.stair_sound.play()
+            self.map = self.map_one
+            self.hero_pos = [9, 12]
+            return
 
     def draw(self):
         self.screen.fill(black)

@@ -28,8 +28,13 @@ screen.set_walking_speed(MPS)
 
 brick_tile = tiles_sheet.get_item(0, 3, 64, 64)
 wall_tile = tiles_sheet.get_item(0, 0, 64, 64)
+stair_down_tile = tiles_sheet.get_item(0, 6, 64, 64)
+stair_up_tile = tiles_sheet.get_item(0, 7, 64, 64)
+
 screen.set_tile('W', wall_tile)
 screen.set_tile('B', brick_tile)
+screen.set_tile('D', stair_down_tile)
+screen.set_tile('U', stair_up_tile)
 screen.update_grid()
 
 total_frames = 0
@@ -41,6 +46,14 @@ pygame.mixer.init()
 pygame.mixer.music.set_volume(0.8)
 pygame.mixer.music.load('sounds/dw1castle.mid')
 pygame.mixer.music.play(-1)
+
+bump_sound = pygame.mixer.Sound('./sounds/bump.wav')
+bump_sound.set_volume(0.8)
+screen.set_bump_sound(bump_sound)
+
+stair_sound = pygame.mixer.Sound('./sounds/stairs.wav')
+stair_sound.set_volume(0.8)
+screen.set_stair_sound(stair_sound)
 
 game_on = True
 keys_down = set([])
@@ -74,7 +87,7 @@ while game_on:
                 screen.walking_right()
             elif key == 32:
                 #spacebar
-                screen.set_walking_speed(MPS*2)
+                screen.set_walking_speed(2.5*MPS)
 
         if event.type == pygame.KEYUP:
             key = event.dict['key']

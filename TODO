@@ -1,4 +1,6 @@
 Implement the tiled screen to deal with a grid-based game
   * Can walk in any direction and there's motion (Check)
-  * Ability to walk inside of a map
+  * Ability to walk inside of a map (Check)
   * Ability to load maps from file
+
+Fade effect when taking stairs or entering/leaving town
