@@ -1,7 +1,7 @@
 import pygame
 
 black = (0, 0, 0)
-FPS = 30
+FPS = 60
 
 class Screen(object):
     def __init__(self, rows, columns, tile_width, tile_height):
@@ -48,6 +48,8 @@ class Screen(object):
 
     def moving(self, row_change, col_change):
         self.motioning = True
+        self.stop_moving = False
+
         self.start_frame = self.total_frames
         self.num_frames = FPS / self.mps
 
@@ -77,8 +79,7 @@ class Screen(object):
         self.mps = mps
 
     def stop_walking(self):
-        self.moving_rows = 0
-        self.moving_cols = 0
+        self.stop_moving = True
 
     def blit_map(self):
         self.motion()
@@ -103,7 +104,7 @@ class Screen(object):
             self.row_offset = int(self.moving_rows * self.tile_height * perc_change)
             self.col_offset = int(self.moving_cols * self.tile_width * perc_change)
         else:
-            if self.moving_rows == 0 and self.moving_cols == 0:
+            if self.stop_moving:
                 #button was let go, stop motioning
                 self.row_offset = 0
                 self.col_offset = 0

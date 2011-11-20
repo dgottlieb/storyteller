@@ -34,7 +34,13 @@ total_frames = 0
 clock = pygame.time.Clock()
 start = time.time()
 
+pygame.mixer.init()
+pygame.mixer.music.set_volume(0.8)
+pygame.mixer.music.load('dw1castle.mid')
+pygame.mixer.music.play(-1)
+
 game_on = True
+keys_down = set([])
 while game_on:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -48,27 +54,34 @@ while game_on:
                 continue
 
         if event.type == pygame.KEYDOWN:
-            if event.dict['key'] == 273:
+            key = event.dict['key']
+            keys_down.add(key)
+            if key == 273:
                 #Up key
                 #screen.walking_up()
                 screen.walking_up()
-            if event.dict['key'] == 276:
+            if key == 276:
                 #Left
                 screen.walking_left()
-            if event.dict['key'] == 274:
+            if key == 274:
                 #Down
                 screen.walking_down()
-            if event.dict['key'] == 275:
+            if key == 275:
                 #Right
                 screen.walking_right()
 
         if event.type == pygame.KEYUP:
-            if event.dict['key'] in (273, 274, 275, 276):
+            key = event.dict['key']
+            if key in keys_down:
+                keys_down.remove(key)
+
+            if event.dict['key'] in (273, 274, 275, 276) and \
+                    len(keys_down.intersection((273, 274, 275, 276))) == 0:
                 #Any array key
                 screen.stop_walking()
 
     screen.draw()
-    clock.tick(30)
+    clock.tick(tiled_screen.FPS)
 
 end = time.time()
 print 'Quitting...'
