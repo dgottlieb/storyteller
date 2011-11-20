@@ -11,17 +11,16 @@ class SpriteSheet(object):
         rect = pygame.Rect(rectangle)
         image = pygame.Surface(rect.size)
 
-        image = image.convert_alpha()
+        image = image.convert()
         image.blit(self.sheet, (0,0), rect)
 
         if transparent:
-            background_transparent = (self.background_color[0], self.background_color[1], 
-                                      self.background_color[2], 0)
-            for x in range(rectangle[-2]):
-                for y in range(rectangle[-1]):
-                    point = (x, y)
-                    if image.get_at(point) == self.background_color:
-                        image.set_at(point, background_transparent)
+            if self.background_color:
+                colorkey = self.background_color
+            else:
+                colorkey = image.get_at((0, 0))
+
+            image.set_colorkey(colorkey, pygame.RLEACCEL)
 
         return image
 
