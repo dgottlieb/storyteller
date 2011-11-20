@@ -27,7 +27,10 @@ screen.set_hero_tps(TPS)
 screen.set_walking_speed(MPS)
 
 brick_tile = tiles_sheet.get_item(0, 3, 64, 64)
-screen.tile(brick_tile)
+wall_tile = tiles_sheet.get_item(0, 0, 64, 64)
+screen.set_tile('W', wall_tile)
+screen.set_tile('B', brick_tile)
+screen.update_grid()
 
 total_frames = 0
 
@@ -51,7 +54,7 @@ while game_on:
             if event.dict['key'] == 27:
                 #Escape
                 game_on = False
-                continue
+                continue            
 
         if event.type == pygame.KEYDOWN:
             key = event.dict['key']
@@ -60,20 +63,26 @@ while game_on:
             if key == 273:
                 #Up key
                 screen.walking_up()
-            if key == 276:
+            elif key == 276:
                 #Left
                 screen.walking_left()
-            if key == 274:
+            elif key == 274:
                 #Down
                 screen.walking_down()
-            if key == 275:
+            elif key == 275:
                 #Right
                 screen.walking_right()
+            elif key == 32:
+                #spacebar
+                screen.set_walking_speed(MPS*2)
 
         if event.type == pygame.KEYUP:
             key = event.dict['key']
             if key in keys_down:
                 keys_down.remove(key)
+
+            if key == 32:
+                screen.set_walking_speed(MPS)
 
     if len(keys_down.intersection((273, 274, 275, 276))) == 0:
         #Any array key

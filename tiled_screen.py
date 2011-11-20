@@ -9,7 +9,26 @@ class Screen(object):
         self.columns = columns + 2
         self.tile_width = tile_width
         self.tile_height = tile_height
+
+        self.tile_map = {}
+
         self.grid = [[None for y in range(self.columns)] for x in range(self.rows)]
+        self.map = ['WWWWWWWWWWWWWW',
+                    'WBBBBBBBBBBBBW',
+                    'WWWWWWWWWWWWWW']
+
+        """
+                    'WBBBBBBBBBBBBW',
+                    'WBBBBBBBBBBBBW',
+                    'WBBBBBBBBBBBBW',
+                    'WBBBBBBBBBBBBW',
+                    'WBBBBBBBBBBBBW',
+                    'WBBBBBBBBBBBBW',
+                    'WBBBBBBBBBBBBW',
+                    'WBBBBBBBBBBBBW',
+                    """
+
+        self.hero_pos = [1, 2]
 
         self.width = tile_width * columns
         self.height = tile_height * rows
@@ -29,11 +48,34 @@ class Screen(object):
     @property
     def size(self):
         return (self.width, self.height)
-        
+    
+    """
     def tile(self, tile):
         for row in self.grid:
             for y in range(len(row)):
                 row[y] = tile
+                """
+
+    def set_tile(self, char, surface):
+        self.tile_map[char] = surface
+
+    def update_grid(self):
+        hero_row = self.hero_pos[0]
+        hero_col = self.hero_pos[1]
+
+        for row_idx in range(len(self.grid)):
+            row = self.grid[row_idx]
+            for col_idx in range(len(row)):
+                map_row_idx = hero_row - self.rows/2 + row_idx
+                map_col_idx = hero_col - self.columns/2 + col_idx
+
+                if map_row_idx >= 0 and map_row_idx < len(self.map) and \
+                        map_col_idx >= 0 and map_col_idx < len(self.map[map_row_idx]):
+                    char = self.map[map_row_idx][map_col_idx]
+                else:
+                    char = None
+
+                self.grid[row_idx][col_idx] = self.tile_map.get(char, None)
 
     def set_hero_up(self, hero_up_animations):
         self.hero_up = hero_up_animations
@@ -63,7 +105,7 @@ class Screen(object):
             self._next = self.walking_up
             return
 
-        self.moving(1, 0)
+        self.moving(-1, 0)
         self._hero_orientation = self.hero_up
 
     def walking_down(self):
@@ -71,7 +113,7 @@ class Screen(object):
             self._next = self.walking_down
             return
 
-        self.moving(-1, 0)
+        self.moving(1, 0)
         self._hero_orientation = self.hero_down
 
     def walking_left(self):
@@ -79,7 +121,7 @@ class Screen(object):
             self._next = self.walking_left
             return
 
-        self.moving(0, 1)
+        self.moving(0, -1)
         self._hero_orientation = self.hero_left
 
     def walking_right(self):
@@ -87,7 +129,7 @@ class Screen(object):
             self._next = self.walking_right
             return
 
-        self.moving(0, -1)
+        self.moving(0, 1)
         self._hero_orientation = self.hero_right
 
     def set_hero_tps(self, tps):
@@ -104,8 +146,11 @@ class Screen(object):
         for row_idx in range(len(self.grid)):
             for col_idx in range(len(self.grid[row_idx])):
                 tile = self.grid[row_idx][col_idx]
-                start_x = self.tile_width * (col_idx - 1) + self.col_offset
-                start_y = self.tile_height * (row_idx - 1) + self.row_offset
+                if not tile:
+                    continue
+
+                start_x = self.tile_width * (col_idx - 1) - self.col_offset
+                start_y = self.tile_height * (row_idx - 1) - self.row_offset
                 self.screen.blit(tile, (start_x, start_y, self.tile_width, self.tile_height))
 
     def blit_hero(self):
@@ -122,7 +167,15 @@ class Screen(object):
             self.row_offset = int(self.moving_rows * self.tile_height * perc_change)
             self.col_offset = int(self.moving_cols * self.tile_width * perc_change)
         else:
+            #We finished moving a spot, update the position
+            self.hero_pos[0] += self.moving_rows
+            self.hero_pos[1] += self.moving_cols
+
+            #and update the slice of the map
+            self.update_grid()
+
             if self._next:
+                #Was another move queued up? If so, execute it
                 self.motioning = False
                 self._next()
                 self._next = None
@@ -134,7 +187,7 @@ class Screen(object):
                 self.col_offset = 0
                 self.motioning = False
             else:
-                #button is still held down, let's
+                #button is still held down, let's keep moving
                 self.moving(self.moving_rows, self.moving_cols)
 
     def draw(self):
