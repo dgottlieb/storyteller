@@ -39,7 +39,7 @@ start = time.time()
 
 pygame.mixer.init()
 pygame.mixer.music.set_volume(0.8)
-pygame.mixer.music.load('dw1castle.mid')
+pygame.mixer.music.load('sounds/dw1castle.mid')
 pygame.mixer.music.play(-1)
 
 game_on = True
