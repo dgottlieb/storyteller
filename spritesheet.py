@@ -1,79 +1,84 @@
 import pygame
 
 class SpriteSheet(object):
-    def __init__(self, filename, background_color=(-1, -1, -1, -1)):
+    def __init__(self, filename, background_color=None):
         self.sheet = pygame.image.load(filename).convert()
         self.background_color = background_color
+        _, _, self.width, self.height = self.sheet.get_rect()
+        self._split()
 
-    def image_at(self, rectangle, colorkey=None):
+    def image_at(self, rectangle, transparent=False):
         rect = pygame.Rect(rectangle)
         image = pygame.Surface(rect.size)
 
         image = image.convert_alpha()
         image.blit(self.sheet, (0,0), rect)
 
-        background_transparent = (self.background_color[0], self.background_color[1], 
-                                  self.background_color[2], 0)
-        for x in range(rectangle[-2]):
-            for y in range(rectangle[-1]):
-                point = (x, y)
-                if image.get_at(point) == self.background_color:
-                    image.set_at(point, background_transparent)
+        if transparent:
+            background_transparent = (self.background_color[0], self.background_color[1], 
+                                      self.background_color[2], 0)
+            for x in range(rectangle[-2]):
+                for y in range(rectangle[-1]):
+                    point = (x, y)
+                    if image.get_at(point) == self.background_color:
+                        image.set_at(point, background_transparent)
 
         return image
 
-    def images_at(self, rects, colorkey=None):
-        return [self.image_at(rect, colorkey) for rect in rects]
+    def images_at(self, rects, transparent=False):
+        return [self.image_at(rect, transparent) for rect in rects]
 
-    def load_strip(self, rect, image_count, colorkey=None):
+    def load_strip(self, rect, image_count, transparent=False):
         tups = [(rect[0] + rect[2]*x, rect[1], rect[2], rect[3])
                 for x in range(image_count)]
-        return self.images_at(tups, colorkey)
+        return self.images_at(tups, transparent)
 
-    def split(self):
+    def _split(self):
         self.sprites = []
-        _, _, width, height = self.sheet.get_rect()
-        rows = []
+        if self.background_color is None:
+            print '(0, 0) color = %s' % (str(self.sheet.get_at([0, 0])))
+            return
 
-        spacer_row = True
-        for y in range(height):
-            for x in range(width):
+        start_row = 0
+        for y in range(self.height):
+            for x in range(self.width):
                 point = (x, y)
                 is_background = (self.sheet.get_at(point) == self.background_color)
                 if is_background:
                     #only care about real images
                     continue
 
-                if spacer_row:
+                if start_row == 0:
                     #Searching for an image and found one, search for its end
-                    rows.append([y, -1])
-                    spacer_row = False
+                    start_row = y
                 else:
                     #We're searching for the next spacer row and this is not it
                     pass
                 break
             else:
                 #Exhausted a spacer row
-                if not spacer_row:
+                if start_row > 0:
                     #We were searching for this, record it as a height
-                    rows[-1][-1] = y - rows[-1][0]
-                spacer_row = True
+                    self.sprites.append(self.get_sprites(start_row, end_row=y))
+                    start_row = 0
 
-        columns = []
 
-        spacer_column = True
-        for x in range(width):
-            for y in range(height):
+    def get_sprites(self, start_row, end_row):
+        """We have a row range that sprites exist, now find the column division"""
+        sprite_rects = []
+
+        start_col = 0
+        for x in range(self.width):
+            for y in range(start_row, end_row):
                 point = (x, y)
                 is_background = (self.sheet.get_at(point) == self.background_color)
                 if is_background:
                     #only care about real images
                     continue
 
-                if spacer_column:
+                if start_col == 0:
                     #Searching for an image and found one, search for its end
-                    columns.append([x, -1])
-                    spacer_column = False
+                    start_col = x
                 else:
                     #We're searching for the next spacer column and this is not it
                     pass
@@ -81,13 +86,13 @@ class SpriteSheet(object):
                 break
             else:
                 #Exhausted a spacer column
-                if not spacer_column:
+                if start_col > 0:
                     #We were searching for this column, record it as a width
-                    columns[-1][-1] = x - columns[-1][0]
-                spacer_column = True
+                    sprite_rects.append([start_col, start_row,
+                                         x - start_col, end_row - start_row])
+                start_col = 0
 
-        self.rows = rows
-        self.columns = columns
+        return sprite_rects
 
     def debug(self, desired_width, desired_height):
         ret = self.sheet.copy()
@@ -106,11 +111,10 @@ class SpriteSheet(object):
 
         return pygame.transform.scale(ret, (desired_width, desired_height))
 
-    def get_item(self, row, column, desired_width, desired_height):
-        x, y = self.rows[row][0], self.columns[column][0]
-        width, height = self.rows[row][1], self.columns[column][1]
+    def get_item(self, row, column, desired_width, desired_height, transparent=False):
+        x, y, width, height = self.sprites[row][column]
 
-        unscaled_image = self.image_at((x, y, width, height))
+        unscaled_image = self.image_at((x, y, width, height), transparent)
         return pygame.transform.scale(unscaled_image, (desired_width, desired_height))
 
     def sprite_width(self):
