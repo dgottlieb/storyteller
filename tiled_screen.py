@@ -1,4 +1,3 @@
-import maps.castle
 import pygame
 
 black = (0, 0, 0)
@@ -38,6 +37,9 @@ class Screen(object):
 
     def set_zone(self, zone):
         self.zone = zone
+        zone.music()
+        if hasattr(self, 'stair_sound'):
+            self.stair_sound.play()
 
     def set_tile(self, char, surface):
         self.tile_map[char] = surface
@@ -58,13 +60,9 @@ class Screen(object):
                 map_row_idx = hero_row - self.rows/2 + row_idx
                 map_col_idx = hero_col - self.columns/2 + col_idx
 
-                if map_row_idx >= 0 and map_row_idx < len(self.zone.map) and \
-                        map_col_idx >= 0 and map_col_idx < len(self.zone.map[map_row_idx]):
-                    char = self.zone.map[map_row_idx][map_col_idx]
-                else:
-                    char = None
-
-                self.grid[row_idx][col_idx] = self.tile_map.get(char, None)
+                
+                tile = self.zone.get_tile(map_row_idx, map_col_idx)
+                self.grid[row_idx][col_idx] = tile
 
     def set_hero_up(self, hero_up_animations):
         self.hero_up = hero_up_animations
@@ -82,7 +80,7 @@ class Screen(object):
     def moving(self, row_change, col_change):
         new_row = self.hero_pos[0] + row_change
         new_col = self.hero_pos[1] + col_change
-        if self.zone.map[new_row][new_col] == 'W':
+        if self.zone.is_wall(new_row, new_col):
             self.bump_sound.play()
             self.stop_walking()
             self.motioning = False
@@ -177,7 +175,7 @@ class Screen(object):
         self.hero_pos[1] += self.moving_cols
 
         #take actions for the new spot
-        self.zone.take_actions(self.hero_pos)
+        self.zone.take_actions(self)
 
         #and update the slice of the map
         self.update_grid()            

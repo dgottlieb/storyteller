@@ -3,9 +3,6 @@ import sys
 import time
 
 import pygame
-
-import maps.castle
-import spritesheet
 import tiled_screen
 
 pygame.init()
@@ -16,8 +13,11 @@ MPS = 3 #Movement per second, how many tiles the hero can walk per second
 
 screen = tiled_screen.Screen(rows=9, columns=13, tile_width=64, tile_height=64)
 
+import maps.castle
+import spritesheet
+import zone
+
 chars_sheet = spritesheet.SpriteSheet("images/chars.png", background_color=(135, 191, 255, 255))
-tiles_sheet = spritesheet.SpriteSheet("images/tiles.png", background_color=(0, 128, 128, 255))
 
 hero = [chars_sheet.get_item(1, x, 64, 64, transparent=True) for x in range(8)]
 screen.set_hero_down(hero[0:2])
@@ -27,29 +27,18 @@ screen.set_hero_up(hero[6:8])
 screen.set_hero_tps(TPS)
 screen.set_walking_speed(MPS)
 
-start_zone = maps.castle.Castle(tiles_sheet, chars_sheet)
+pygame.mixer.init()
+pygame.mixer.music.set_volume(0.8)
+
+start_zone = maps.castle.Castle()
 screen.set_zone(start_zone)
 
-brick_tile = tiles_sheet.get_item(0, 3, 64, 64)
-wall_tile = tiles_sheet.get_item(0, 0, 64, 64)
-stair_down_tile = tiles_sheet.get_item(0, 6, 64, 64)
-stair_up_tile = tiles_sheet.get_item(0, 7, 64, 64)
-
-screen.set_tile('W', wall_tile)
-screen.set_tile('B', brick_tile)
-screen.set_tile('D', stair_down_tile)
-screen.set_tile('U', stair_up_tile)
 screen.update_grid()
 
 total_frames = 0
 
 clock = pygame.time.Clock()
 start = time.time()
-
-pygame.mixer.init()
-pygame.mixer.music.set_volume(0.8)
-pygame.mixer.music.load('sounds/dw1castle.mid')
-pygame.mixer.music.play(-1)
 
 bump_sound = pygame.mixer.Sound('./sounds/bump.wav')
 bump_sound.set_volume(0.8)
