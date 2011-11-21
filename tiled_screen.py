@@ -1,3 +1,4 @@
+import maps.castle
 import pygame
 
 black = (0, 0, 0)
@@ -13,25 +14,6 @@ class Screen(object):
         self.tile_map = {}
 
         self.grid = [[None for y in range(self.columns)] for x in range(self.rows)]
-        self.map_one = ['WWWWWWWWWWWWWW',
-                        'WBBBBBBBBBBBBW',
-                        'WBBBBBBBBBBBBW',
-                        'WBBBBBBBBBBBBW',
-                        'WBBBBBBBBBBBBW',
-                        'WBBBBBBBBBBBBW',
-                        'WBBBBBBBBBBBBW',
-                        'WBBBBBBBBBBBBW',
-                        'WBBBBBBBBBBBBW',
-                        'WBBBBBBBBBBBDW',
-                        'WWWWWWWWWWWWWW']
-
-        self.map_two = ["WWW",
-                        "WUWWWW",
-                        "WBBBBW",
-                        "WBBBBW",
-                        "WWWWWW"]
-
-        self.map = self.map_one
 
         self.hero_pos = [1, 2]
 
@@ -54,6 +36,9 @@ class Screen(object):
     def size(self):
         return (self.width, self.height)
 
+    def set_zone(self, zone):
+        self.zone = zone
+
     def set_tile(self, char, surface):
         self.tile_map[char] = surface
 
@@ -73,9 +58,9 @@ class Screen(object):
                 map_row_idx = hero_row - self.rows/2 + row_idx
                 map_col_idx = hero_col - self.columns/2 + col_idx
 
-                if map_row_idx >= 0 and map_row_idx < len(self.map) and \
-                        map_col_idx >= 0 and map_col_idx < len(self.map[map_row_idx]):
-                    char = self.map[map_row_idx][map_col_idx]
+                if map_row_idx >= 0 and map_row_idx < len(self.zone.map) and \
+                        map_col_idx >= 0 and map_col_idx < len(self.zone.map[map_row_idx]):
+                    char = self.zone.map[map_row_idx][map_col_idx]
                 else:
                     char = None
 
@@ -97,7 +82,7 @@ class Screen(object):
     def moving(self, row_change, col_change):
         new_row = self.hero_pos[0] + row_change
         new_col = self.hero_pos[1] + col_change
-        if self.map[new_row][new_col] == 'W':
+        if self.zone.map[new_row][new_col] == 'W':
             self.bump_sound.play()
             self.stop_walking()
             self.motioning = False
@@ -161,7 +146,10 @@ class Screen(object):
             for col_idx in range(len(self.grid[row_idx])):
                 tile = self.grid[row_idx][col_idx]
                 if not tile:
-                    continue
+                    if self.zone.background:
+                        tile = self.zone.background
+                    else:
+                        continue
 
                 start_x = self.tile_width * (col_idx - 1) - self.col_offset
                 start_y = self.tile_height * (row_idx - 1) - self.row_offset
@@ -189,7 +177,7 @@ class Screen(object):
         self.hero_pos[1] += self.moving_cols
 
         #take actions for the new spot
-        self.take_actions()
+        self.zone.take_actions(self.hero_pos)
 
         #and update the slice of the map
         self.update_grid()            
@@ -207,19 +195,6 @@ class Screen(object):
         else:
             #button is still held down, let's keep moving
             self.moving(self.moving_rows, self.moving_cols)
-
-    def take_actions(self):
-        if self.map == self.map_one and self.hero_pos == [9, 12]:
-            self.stair_sound.play()
-            self.map = self.map_two
-            self.hero_pos = [1, 1]
-            return
-
-        if self.map == self.map_two and self.hero_pos == [1, 1]:
-            self.stair_sound.play()
-            self.map = self.map_one
-            self.hero_pos = [9, 12]
-            return
 
     def draw(self):
         self.screen.fill(black)

@@ -2,10 +2,11 @@
 import sys
 import time
 
+import pygame
+
+import maps.castle
 import spritesheet
 import tiled_screen
-
-import pygame
 
 pygame.init()
 pygame.mouse.set_visible(0)
@@ -25,6 +26,9 @@ screen.set_hero_left(hero[4:6])
 screen.set_hero_up(hero[6:8])
 screen.set_hero_tps(TPS)
 screen.set_walking_speed(MPS)
+
+start_zone = maps.castle.Castle(tiles_sheet, chars_sheet)
+screen.set_zone(start_zone)
 
 brick_tile = tiles_sheet.get_item(0, 3, 64, 64)
 wall_tile = tiles_sheet.get_item(0, 0, 64, 64)
