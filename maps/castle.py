@@ -4,7 +4,7 @@ castle = [
 "..W.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.W.",
 "..W.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.W.",
 "..W.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.W.",
-"..W.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.W.",
+"..W.B.B.B.M0B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.W.",
 "..W.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.W.",
 "..W.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.W.",
 "E0E0B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.W.",
@@ -28,6 +28,7 @@ castle = [
 import pygame
 
 import chars
+import tiles
 import world
 import zone
 
@@ -41,6 +42,10 @@ class Castle(zone.Zone):
         if tile_str == 'E0':
             return {'tile': None,
                     'exit': (lambda: world.World(), ('C0', 0), chars.DOWN)}
+
+        if tile_str == 'M0':
+            return {'tile': tiles.brick_tile,
+                    'npc': None}
 
     def special_actions(self, tile):
         pass

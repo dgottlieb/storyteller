@@ -1,6 +1,7 @@
 import pygame
 
 import chars
+import sounds
 
 black = (0, 0, 0)
 FPS = 60
@@ -48,14 +49,9 @@ class Screen(object):
     def set_zone(self, zone):
         self.zone = zone
         zone.music()
-        if hasattr(self, 'stair_sound'):
-            self.stair_sound.play()
 
     def set_tile(self, char, surface):
         self.tile_map[char] = surface
-
-    def set_bump_sound(self, bump_sound):
-        self.bump_sound = bump_sound
 
     def set_stair_sound(self, stair_sound):
         self.stair_sound = stair_sound
@@ -82,12 +78,12 @@ class Screen(object):
         new_row = self.hero_pos[0] + row_change
         new_col = self.hero_pos[1] + col_change
         if self.zone.is_wall(new_row, new_col):
-            self.bump_sound.play()
+            sounds.bump_sound.play()
             self.stop_walking()
             self.motioning = False
             return
 
-        self.bump_sound.stop()
+        sounds.bump_sound.stop()
 
         self.motioning = True
         self.stop_moving = False

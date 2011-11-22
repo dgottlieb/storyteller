@@ -1,3 +1,4 @@
+import rpg_game
 import sounds
 from tiles import *
 
@@ -11,7 +12,8 @@ basic_tile_map = {'W': wall_tile,
 class Zone(object):
     def __init__(self):
         self.background = None
-        self.specials = {}
+        self.npcs = []
+        self.locations = {}
 
     def music(self):
         sounds.play_music(self.music_file)
@@ -32,13 +34,16 @@ class Zone(object):
             for idx in range(len(row)/2):
                 first = row[2*idx]
                 second = row[2*idx+1]
-                tile, special = parse_basic_tile(first, second)
+                tile, tile_str = parse_basic_tile(first, second)
+
+                if isinstance(tile, dict) and 'npc' in tile:
+                    self.npcs.append(tile['npc'])
 
                 ret.append(tile)
-                if special:
-                    if special not in self.specials:
-                        self.specials[special] = []
-                    self.specials[special].append([row_idx, idx])
+                if tile_str:
+                    if tile_str not in self.locations:
+                        self.locations[tile_str] = []
+                    self.locations[tile_str].append([row_idx, idx])
 
             return ret
 
@@ -46,7 +51,7 @@ class Zone(object):
         return ret
 
     def get_position(self, search_tile):
-        return self.specials[search_tile[0]][search_tile[1]]
+        return self.locations[search_tile[0]][search_tile[1]]
 
     def take_actions(self, screen):
         tile = self.map[screen.hero_pos[0]][screen.hero_pos[1]]
@@ -56,8 +61,11 @@ class Zone(object):
         if 'exit' in tile:
             new_zone = tile['exit'][0]()
             screen.set_zone(new_zone)
+            sounds.stair_sound.play()
             screen.hero_pos = new_zone.get_position(tile['exit'][1])
             screen.set_hero_orientation(tile['exit'][2])
+            screen.stop_walking()
+
             return
             
 

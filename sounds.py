@@ -9,7 +9,6 @@ bump_sound.set_volume(0.8)
 stair_sound = pygame.mixer.Sound('./sounds/stairs.wav')
 stair_sound.set_volume(0.8)
 
-
 def play_music(song_file):
     pygame.mixer.music.stop()
     pygame.mixer.music.load(song_file)
