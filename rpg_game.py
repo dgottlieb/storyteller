@@ -7,28 +7,16 @@ import tiled_screen
 
 pygame.init()
 pygame.mouse.set_visible(0)
-
-TPS = 2 #Twitches per second, characters transitioning between different states
-MPS = 3 #Movement per second, how many tiles the hero can walk per second
-
 screen = tiled_screen.Screen(rows=9, columns=13, tile_width=64, tile_height=64)
 
+import sounds
+import chars
+
+chars.init_hero(screen)
+
 import maps.castle
-import spritesheet
 import zone
 
-chars_sheet = spritesheet.SpriteSheet("images/chars.png", background_color=(135, 191, 255, 255))
-
-hero = [chars_sheet.get_item(1, x, 64, 64, transparent=True) for x in range(8)]
-screen.set_hero_down(hero[0:2])
-screen.set_hero_right(hero[2:4])
-screen.set_hero_left(hero[4:6])
-screen.set_hero_up(hero[6:8])
-screen.set_hero_tps(TPS)
-screen.set_walking_speed(MPS)
-
-pygame.mixer.init()
-pygame.mixer.music.set_volume(0.8)
 
 start_zone = maps.castle.Castle()
 screen.set_zone(start_zone)
@@ -40,13 +28,8 @@ total_frames = 0
 clock = pygame.time.Clock()
 start = time.time()
 
-bump_sound = pygame.mixer.Sound('./sounds/bump.wav')
-bump_sound.set_volume(0.8)
-screen.set_bump_sound(bump_sound)
-
-stair_sound = pygame.mixer.Sound('./sounds/stairs.wav')
-stair_sound.set_volume(0.8)
-screen.set_stair_sound(stair_sound)
+screen.set_bump_sound(sounds.bump_sound)
+screen.set_stair_sound(sounds.stair_sound)
 
 game_on = True
 keys_down = set([])

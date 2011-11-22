@@ -18,11 +18,7 @@ class World(zone.Zone):
         zone.Zone.__init__(self)
         self.map = self.parse_map(world)
         self.background = zone.ocean_5_tile
-
-    def music(self):
-        pygame.mixer.music.stop()
-        pygame.mixer.music.load('sounds/dw1overw.mid')
-        pygame.mixer.music.play(-1)
+        self.music_file = 'sounds/dw1overw.mid'
 
     def parse_tile(self, tile_str):
         if tile_str == 'C0':
