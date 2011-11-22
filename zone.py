@@ -57,6 +57,7 @@ class Zone(object):
             new_zone = tile['exit'][0]()
             screen.set_zone(new_zone)
             screen.hero_pos = new_zone.get_position(tile['exit'][1])
+            screen.set_hero_orientation(tile['exit'][2])
             return
             
 

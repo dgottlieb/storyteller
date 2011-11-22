@@ -27,6 +27,7 @@ castle = [
 
 import pygame
 
+import chars
 import world
 import zone
 
@@ -39,7 +40,7 @@ class Castle(zone.Zone):
     def parse_tile(self, tile_str):
         if tile_str == 'E0':
             return {'tile': None,
-                    'exit': (lambda: world.World(), ('C0', 0))}
+                    'exit': (lambda: world.World(), ('C0', 0), chars.DOWN)}
 
     def special_actions(self, tile):
         pass

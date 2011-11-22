@@ -2,7 +2,7 @@ import pygame
 
 class SpriteSheet(object):
     def __init__(self, filename, background_color=None):
-        self.sheet = pygame.image.load(filename).convert()
+        self.sheet = pygame.image.load(filename)
         self.background_color = background_color
         _, _, self.width, self.height = self.sheet.get_rect()
         self._split()

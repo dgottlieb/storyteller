@@ -3,20 +3,16 @@ import sys
 import time
 
 import pygame
-import tiled_screen
-
 pygame.init()
 pygame.mouse.set_visible(0)
+
+import tiled_screen
 screen = tiled_screen.Screen(rows=9, columns=13, tile_width=64, tile_height=64)
 
-import sounds
 import chars
-
-chars.init_hero(screen)
+import sounds
 
 import maps.castle
-import zone
-
 
 start_zone = maps.castle.Castle()
 screen.set_zone(start_zone)
@@ -63,7 +59,7 @@ while game_on:
                 screen.walking_right()
             elif key == 32:
                 #spacebar
-                screen.set_walking_speed(2.5*MPS)
+                screen.set_walking_speed(2.5*tiled_screen.MPS)
 
         if event.type == pygame.KEYUP:
             key = event.dict['key']
@@ -71,7 +67,7 @@ while game_on:
                 keys_down.remove(key)
 
             if key == 32:
-                screen.set_walking_speed(MPS)
+                screen.set_walking_speed(tiled_screen.MPS)
 
     if len(keys_down.intersection((273, 274, 275, 276))) == 0:
         #Any array key

@@ -1,7 +1,12 @@
 import pygame
 
+import chars
+
 black = (0, 0, 0)
 FPS = 60
+
+TPS = 2 #Twitches per second, characters transitioning between different states
+MPS = 3 #Movement per second, how many tiles the hero can walk per second
 
 class Screen(object):
     def __init__(self, rows, columns, tile_width, tile_height):
@@ -14,13 +19,18 @@ class Screen(object):
 
         self.grid = [[None for y in range(self.columns)] for x in range(self.rows)]
 
-        self.hero_pos = [1, 2]
-
         self.width = tile_width * columns
         self.height = tile_height * rows
 
-        self.screen = pygame.display.set_mode(self.size)
         self.total_frames = 0
+        self.screen = pygame.display.set_mode(self.size)
+
+        self.hero_animations = chars.get_hero()
+        self.set_hero_tps(TPS)
+        self.set_walking_speed(MPS)
+
+        self.hero_pos = [1, 2] #load from savegame
+        self.set_hero_orientation(chars.DOWN)
 
         self.hero_rect = (columns/2 * tile_width, rows/2 * tile_height,
                           tile_width, tile_height)
@@ -64,18 +74,9 @@ class Screen(object):
                 tile = self.zone.get_tile(map_row_idx, map_col_idx)
                 self.grid[row_idx][col_idx] = tile
 
-    def set_hero_up(self, hero_up_animations):
-        self.hero_up = hero_up_animations
-        self._hero_orientation = self.hero_up
-
-    def set_hero_left(self, hero_left_animations):
-        self.hero_left = hero_left_animations
-
-    def set_hero_down(self, hero_down_animations):
-        self.hero_down = hero_down_animations
-
-    def set_hero_right(self, hero_right_animations):
-        self.hero_right = hero_right_animations
+    def set_hero_orientation(self, orientation_slice):
+        self._hero_orientation = self.hero_animations.__getslice__(orientation_slice[0],
+                                                                   orientation_slice[1])
 
     def moving(self, row_change, col_change):
         new_row = self.hero_pos[0] + row_change
@@ -103,7 +104,7 @@ class Screen(object):
             return
 
         self.moving(-1, 0)
-        self._hero_orientation = self.hero_up
+        self.set_hero_orientation(chars.UP)
 
     def walking_down(self):
         if self.motioning:
@@ -111,7 +112,7 @@ class Screen(object):
             return
 
         self.moving(1, 0)
-        self._hero_orientation = self.hero_down
+        self.set_hero_orientation(chars.DOWN)
 
     def walking_left(self):
         if self.motioning:
@@ -119,7 +120,7 @@ class Screen(object):
             return
 
         self.moving(0, -1)
-        self._hero_orientation = self.hero_left
+        self.set_hero_orientation(chars.LEFT)
 
     def walking_right(self):
         if self.motioning:
@@ -127,7 +128,7 @@ class Screen(object):
             return
 
         self.moving(0, 1)
-        self._hero_orientation = self.hero_right
+        self.set_hero_orientation(chars.RIGHT)
 
     def set_hero_tps(self, tps):
         self.hero_tps = tps

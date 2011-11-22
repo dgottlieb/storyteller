@@ -10,6 +10,7 @@ world = [
 
 import pygame
 
+import chars
 import castle
 import zone
 
@@ -23,4 +24,4 @@ class World(zone.Zone):
     def parse_tile(self, tile_str):
         if tile_str == 'C0':
             return {'tile': zone.castle_tile,
-                    'exit': (lambda: castle.Castle(), ('E0', 5))}
+                    'exit': (lambda: castle.Castle(), ('E0', 5), chars.RIGHT)}
