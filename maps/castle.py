@@ -28,9 +28,11 @@ castle = [
 import pygame
 
 import chars
+import npc
 import tiles
 import world
 import zone
+
 
 class Castle(zone.Zone):
     def __init__(self):
@@ -38,14 +40,15 @@ class Castle(zone.Zone):
         self.map = self.parse_map(castle)
         self.music_file = 'sounds/dw1castle.mid'
 
-    def parse_tile(self, tile_str):
+    def parse_tile(self, tile_str, row, column):
         if tile_str == 'E0':
             return {'tile': None,
                     'exit': (lambda: world.World(), ('C0', 0), chars.DOWN)}
 
         if tile_str == 'M0':
+            merchant = npc.NPC(chars.get_merchant(), row, column)
             return {'tile': tiles.brick_tile,
-                    'npc': None}
+                    'npc': merchant}
 
     def special_actions(self, tile):
         pass

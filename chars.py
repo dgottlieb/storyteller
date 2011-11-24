@@ -10,3 +10,7 @@ UP = [6, 8]
 def get_hero():
     hero = [chars_sheet.get_item(1, x, 64, 64, transparent=True) for x in range(8)]
     return hero
+
+def get_merchant():
+    merchant = [chars_sheet.get_item(7, x, 64, 64, transparent=True) for x in range(8)]
+    return merchant

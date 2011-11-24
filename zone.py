@@ -19,14 +19,14 @@ class Zone(object):
         sounds.play_music(self.music_file)
 
     def parse_map(self, map_strs):
-        def parse_basic_tile(first, second):
-            if second == '.':
-                return first, None
+        def parse_basic_tile(first_bit, second_bit, row, column):
+            if second_bit == '.':
+                return first_bit, None
 
-            if first == 'O':
-                return oceans[int(second)-1], None
+            if first_bit == 'O':
+                return oceans[int(second_bit)-1], None
 
-            return self.parse_tile(first + second), (first + second)
+            return self.parse_tile(first_bit + second_bit, row, column), (first_bit + second_bit)
 
         def parse_row(row_idx):
             ret = []
@@ -34,7 +34,7 @@ class Zone(object):
             for idx in range(len(row)/2):
                 first = row[2*idx]
                 second = row[2*idx+1]
-                tile, tile_str = parse_basic_tile(first, second)
+                tile, tile_str = parse_basic_tile(first, second, row_idx, idx)
 
                 if isinstance(tile, dict) and 'npc' in tile:
                     self.npcs.append(tile['npc'])

@@ -21,7 +21,7 @@ class World(zone.Zone):
         self.background = zone.ocean_5_tile
         self.music_file = 'sounds/dw1overw.mid'
 
-    def parse_tile(self, tile_str):
+    def parse_tile(self, tile_str, row, column):
         if tile_str == 'C0':
             return {'tile': zone.castle_tile,
                     'exit': (lambda: castle.Castle(), ('E0', 5), chars.RIGHT)}

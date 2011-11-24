@@ -83,6 +83,13 @@ class Screen(object):
             self.motioning = False
             return
 
+        for npc in self.zone.npcs:
+            if npc.row == new_row and npc.col == new_col:
+                sounds.bump_sound.play()
+                self.stop_walking()
+                self.motioning = False
+                return
+
         sounds.bump_sound.stop()
 
         self.motioning = True
@@ -155,6 +162,23 @@ class Screen(object):
         hero_frame_idx = (self.total_frames / frames_per_twitch) % len(self._hero_orientation)
         self.screen.blit(self._hero_orientation[hero_frame_idx], self.hero_rect)
 
+    def blit_npcs(self):
+        for npc in self.zone.npcs:
+            rel_row = npc.row - self.hero_pos[0] + (self.rows/2)
+            rel_col = npc.col - self.hero_pos[1] + (self.columns/2)
+            if rel_row < 0 or rel_row > self.rows:
+                continue
+
+            if rel_col < 0 or rel_col > self.columns:
+                continue                    
+
+            frames_per_twitch = (FPS / self.hero_tps)
+            npc_sprite = npc.get_sprite(self.total_frames, frames_per_twitch)
+
+            start_x = npc.width * (rel_col - 1) - self.col_offset
+            start_y = npc.height * (rel_row - 1) - self.row_offset
+            self.screen.blit(npc_sprite, (start_x, start_y, npc.width, npc.height))
+
     def motion(self):
         if self.motioning == False:
             return
@@ -194,6 +218,7 @@ class Screen(object):
     def draw(self):
         self.screen.fill(black)
         self.blit_map()
+        self.blit_npcs()
         self.blit_hero()
 
         pygame.display.flip()
