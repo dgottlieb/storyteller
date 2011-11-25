@@ -46,7 +46,11 @@ class Castle(zone.Zone):
                     'exit': (lambda: world.World(), ('C0', 0), chars.DOWN)}
 
         if tile_str == 'M0':
-            merchant = npc.NPC(chars.get_merchant(), row, column)
+            walk_path = {(row, column): ((1, 0), 2),
+                         (row + 1, column): ((0, 1), 2),
+                         (row + 1, column + 1): ((-1, 0), 2),
+                         (row, column + 1): ((0, -1), 0)}
+            merchant = npc.NPC(chars.get_merchant(), row, column, walk_path)
             return {'tile': tiles.brick_tile,
                     'npc': merchant}
 

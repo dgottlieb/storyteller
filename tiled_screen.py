@@ -1,9 +1,11 @@
 import pygame
 
 import chars
+import menu
 import sounds
 
 black = (0, 0, 0)
+white = (255, 255, 255)
 FPS = 60
 
 TPS = 2 #Twitches per second, characters transitioning between different states
@@ -30,7 +32,7 @@ class Screen(object):
         self.set_hero_tps(TPS)
         self.set_walking_speed(MPS)
 
-        self.hero_pos = [1, 2] #load from savegame
+        self.hero_pos = self.hero_new_pos = [1, 2] #load from savegame
         self.set_hero_orientation(chars.DOWN)
 
         self.hero_rect = (columns/2 * tile_width, rows/2 * tile_height,
@@ -41,6 +43,8 @@ class Screen(object):
 
         self.row_offset = 0
         self.col_offset = 0
+
+        self.menu = None
 
     @property
     def size(self):
@@ -66,7 +70,6 @@ class Screen(object):
                 map_row_idx = hero_row - self.rows/2 + row_idx
                 map_col_idx = hero_col - self.columns/2 + col_idx
 
-                
                 tile = self.zone.get_tile(map_row_idx, map_col_idx)
                 self.grid[row_idx][col_idx] = tile
 
@@ -90,6 +93,12 @@ class Screen(object):
                 self.motioning = False
                 return
 
+            if npc.new_row == new_row and npc.new_col == new_col:
+                sounds.bump_sound.play()
+                self.stop_walking()
+                self.motioning = False
+                return                
+
         sounds.bump_sound.stop()
 
         self.motioning = True
@@ -100,6 +109,8 @@ class Screen(object):
 
         self.moving_rows = row_change
         self.moving_cols = col_change
+
+        self.hero_new_pos = (new_row, new_col)
 
     def walking_up(self):
         if self.motioning:
@@ -175,11 +186,15 @@ class Screen(object):
             frames_per_twitch = (FPS / self.hero_tps)
             npc_sprite = npc.get_sprite(self.total_frames, frames_per_twitch)
 
-            start_x = npc.width * (rel_col - 1) - self.col_offset
-            start_y = npc.height * (rel_row - 1) - self.row_offset
+            start_x = npc.width * (rel_col - 1) + npc.offset_col - self.col_offset
+            start_y = npc.height * (rel_row - 1) + npc.offset_row - self.row_offset
             self.screen.blit(npc_sprite, (start_x, start_y, npc.width, npc.height))
 
     def motion(self):
+        for npc in self.zone.npcs:
+            npc.walk(self.total_frames, self.hero_pos, self.hero_new_pos)
+            npc.motion(self.total_frames)
+
         if self.motioning == False:
             return
 
@@ -215,11 +230,20 @@ class Screen(object):
             #button is still held down, let's keep moving
             self.moving(self.moving_rows, self.moving_cols)
 
+    def open_menu(self):
+        self.menu = menu.Menu(self.total_frames)
+
+    def close_menu(self):
+        self.menu = None
+
     def draw(self):
-        self.screen.fill(black)
-        self.blit_map()
-        self.blit_npcs()
-        self.blit_hero()
+        if not self.menu:
+            self.screen.fill(black)
+            self.blit_map()
+            self.blit_hero()
+            self.blit_npcs()
+        else:
+            self.menu.blit_menu(self.screen, self.total_frames)
 
         pygame.display.flip()
 

@@ -58,6 +58,16 @@ if __name__ == '__main__':
                 elif key == 32:
                     #Spacebar
                     screen.set_walking_speed(2.5*tiled_screen.MPS)
+                elif key == 122:
+                    #Z
+                    if not screen.menu:
+                        sounds.beep_sound.play()
+                        screen.open_menu()
+                        
+                elif key == 120:
+                    #X
+                    screen.close_menu()
+                
 
             if event.type == pygame.KEYUP:
                 key = event.dict['key']
