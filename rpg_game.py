@@ -38,41 +38,40 @@ if __name__ == '__main__':
             if 'key' not in event.dict:
                 continue
 
-            if screen.game_state == tiled_screen.WORLD:
-                if event.type == pygame.KEYUP:
-                    if event.dict['key'] == 27:
-                    #Escape
-                        game_on = False
-                        continue            
+            key = event.dict['key']
+            if event.type == pygame.KEYDOWN and key == 27:
+                #Escape
+                game_on = False
+                continue            
 
-                if event.type == pygame.KEYDOWN:
-                    key = event.dict['key']
-                    keys_down.add(key)
+            if screen.game_state == tiled_screen.WORLD and \
+                    event.type == pygame.KEYDOWN:
 
-                    if key == 273:
+                keys_down.add(key)
+                if key == 273:
                     #Up key
-                        screen.walking_up()
-                    elif key == 276:
+                    screen.walking_up()
+                elif key == 276:
                     #Left
-                        screen.walking_left()
-                    elif key == 274:
+                    screen.walking_left()
+                elif key == 274:
                     #Down
-                        screen.walking_down()
-                    elif key == 275:
+                    screen.walking_down()
+                elif key == 275:
                     #Right
-                        screen.walking_right()
-                    elif key == 32:
+                    screen.walking_right()
+                elif key == 32:
                     #Spacebar
-                        screen.set_walking_speed(2.5*tiled_screen.MPS)
-                    elif key == 122:
+                    screen.set_walking_speed(2.5*tiled_screen.MPS)
+                elif key == 122:
                     #Z
-                        if not screen.menu:
-                            sounds.beep_sound.play()
-                            screen.open_menu()
+                    if not screen.menu:
+                        sounds.beep_sound.play()
+                        screen.open_menu()
+                        continue
                 
-
+            
             if event.type == pygame.KEYUP:
-                key = event.dict['key']
                 if key in keys_down:
                     keys_down.remove(key)
 
@@ -80,23 +79,30 @@ if __name__ == '__main__':
                     screen.set_walking_speed(tiled_screen.MPS)
 
             if len(keys_down.intersection((273, 274, 275, 276))) == 0:
-            #Any array key
+                #Any array key
                 screen.stop_walking()
 
-            if screen.game_state == tiled_screen.MENU:
-                if event.type == pygame.KEYUP:
-                    continue
+            if screen.game_state == tiled_screen.MENU and \
+                    event.type == pygame.KEYDOWN:
 
-                key = event.dict['key']
                 if key == 120:
                     #X
-                    screen.close_menu()
-                if key in (273, 274, 275, 276):
+                    screen.close_all_menus()
+                elif key in (273, 274, 275, 276):
                     if screen.total_frames < next_possible_menu_input_frame:
                         continue
 
                     screen.menu[-1].move_selection(key)
                     #next_possible_menu_input_frame = screen.total_frames + (0.25 * tiled_screen.FPS)
+                elif key == 122:
+                    #Z
+                    action = screen.menu[-1].selected()
+                    if action == 'close':
+                        screen.close_menu()
+                    elif action == 'close_all':
+                        screen.close_all_menus()
+                    else:
+                        screen.open_menu(action)
 
         screen.draw()
         clock.tick(tiled_screen.FPS)
