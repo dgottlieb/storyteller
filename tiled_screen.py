@@ -11,6 +11,10 @@ FPS = 60
 TPS = 2 #Twitches per second, characters transitioning between different states
 MPS = 3 #Movement per second, how many tiles the hero can walk per second
 
+WORLD = 0
+MENU = 1
+FIGHT = 2
+
 class Screen(object):
     def __init__(self, rows, columns, tile_width, tile_height):
         self.rows = rows + 2
@@ -44,7 +48,8 @@ class Screen(object):
         self.row_offset = 0
         self.col_offset = 0
 
-        self.menu = None
+        self.menu = []
+        self.game_state = WORLD
 
     @property
     def size(self):
@@ -230,11 +235,17 @@ class Screen(object):
             #button is still held down, let's keep moving
             self.moving(self.moving_rows, self.moving_cols)
 
-    def open_menu(self):
-        self.menu = menu.Menu(self.total_frames)
+    def open_menu(self, menu_func=None):
+        self.game_state = MENU
+        if not menu_func:
+            self.menu.append(menu.WorldMenu(self.total_frames))
+        else:
+            self.menu.append(menu_func(self.total_frames))
 
     def close_menu(self):
-        self.menu = None
+        self.menu.pop()
+        if not self.menu:
+            self.game_state = WORLD
 
     def draw(self):
         if not self.menu:
@@ -243,7 +254,7 @@ class Screen(object):
             self.blit_hero()
             self.blit_npcs()
         else:
-            self.menu.blit_menu(self.screen, self.total_frames)
+            self.menu[-1].blit_menu(self.screen, self.total_frames)
 
         pygame.display.flip()
 

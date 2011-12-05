@@ -10,20 +10,81 @@ default_font = pygame.font.get_default_font()
 writer = pygame.font.Font(default_font, 25)
 
 talk_option = writer.render('Talk', False, white, black)
+spells_option = writer.render('Spells', False, white, black)
+status_option = writer.render('Status', False, white, black)
+items_option = writer.render('Items', False, white, black)
+use_option = writer.render('Use', False, white, black)
+equip_option = writer.render('Equip', False, white, black)
+
 arrow_img = pygame.image.load('images/arrow.gif')
 
-BPS = 2 #blinks per second
+BPS = 4 #blinks per second
 
-class Menu(object):
-    def __init__(self, start_frame):
+class BaseMenu(object):
+    def __init__(self, start_frame_num, pos, menu_items):
         self.arrow_img = arrow_img.convert()
-        self.start_frame = start_frame
+        self.arrow_size = (40, 10)
+
+        self.start_frame_num = start_frame_num
+
+        self.pos = pos
+
+        self.selection = [0, 0]
+        self.menu_items = menu_items
+
+        rows, cols = len(menu_items), len(menu_items[0])
+        self.size = (27 + 122 * cols, 27 + 37 * rows)
 
     def blit_menu(self, screen, frame):
-        screen.fill(black, (40, 30, 300, 325))
-        screen.fill(white, (45, 35, 290, 315))
-        screen.fill(black, (47, 37, 286, 311))
+        screen.fill(black, (self.pos + self.size))
+        screen.fill(white, self.white_box)
+        screen.fill(black, self.inside_box)
 
-        if ((frame - self.start_frame) / (tiled_screen.FPS / BPS)) % 2 == 0:
-            screen.blit(self.arrow_img, (60, 50, 40, 10))
-        screen.blit(talk_option, (90, 50, 200, 10))
+        blit_arrow = ((frame - self.start_frame_num) / int(tiled_screen.FPS / BPS)) % 5 > 1
+
+        first_pos = (self.pos[0] + 40, self.pos[1] + 20)
+        size = (200, 10)
+        for row_idx in range(len(self.menu_items)):
+            row = self.menu_items[row_idx]
+            for col_idx in range(len(row)):
+                item = row[col_idx]
+
+                pos = (first_pos[0] + col_idx * 122, first_pos[1] + row_idx * 37)
+                screen.blit(item, pos + (200, 10))
+
+                if blit_arrow and [row_idx, col_idx] == self.selection:
+                    arrow_pos = (pos[0] - 24, pos[1] + 3)
+                    screen.blit(self.arrow_img, arrow_pos + self.arrow_size)
+
+    @property
+    def white_box(self):
+        new_pos = (self.pos[0] + 5, self.pos[1] + 5)
+        new_size = (self.size[0] - 10, self.size[1] - 10)
+        return new_pos + new_size
+
+    @property
+    def inside_box(self):
+        white_box = self.white_box
+        new_pos = (white_box[0] + 2, white_box[1] + 2)
+        new_size = (white_box[2] - 4, white_box[3] - 4)
+        return new_pos + new_size
+
+    def move_selection(self, input_code):
+        move_map = {273: (-1, 0), #UP
+                    274: (1, 0), #DOWN
+                    275: (0, 1), #RIGHT
+                    276: (0, -1)} #LEFt
+
+        move = move_map[input_code]
+        self.selection[0] += move[0]
+        self.selection[1] += move[1]
+
+        self.selection[0] = (self.selection[0]) % len(self.menu_items)
+        self.selection[1] = (self.selection[1]) % len(self.menu_items[0])
+
+class WorldMenu(BaseMenu):
+    def __init__(self, start_frame_num):
+        options = [(talk_option, spells_option), 
+                   (status_option, items_option), 
+                   (use_option, equip_option)]
+        BaseMenu.__init__(self, start_frame_num, (40, 30), options)
