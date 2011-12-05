@@ -247,6 +247,10 @@ class Screen(object):
         if not self.menu:
             self.game_state = WORLD
 
+    def close_all_menus(self):
+        while self.menu:
+            self.close_menu()
+
     def draw(self):
         if not self.menu:
             self.screen.fill(black)
