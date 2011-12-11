@@ -8,13 +8,15 @@ black = (0, 0, 0)
 pygame.font.init()
 default_font = pygame.font.get_default_font()
 writer = pygame.font.Font(default_font, 25)
+_, font_height = writer.size('A')
 
-talk_option = writer.render('Talk', False, white, black)
-spells_option = writer.render('Spells', False, white, black)
-status_option = writer.render('Status', False, white, black)
-items_option = writer.render('Items', False, white, black)
-use_option = writer.render('Use', False, white, black)
-equip_option = writer.render('Equip', False, white, black)
+antialias = False
+talk_option = writer.render('Talk', antialias, white, black)
+spells_option = writer.render('Spells', antialias, white, black)
+status_option = writer.render('Status', antialias, white, black)
+items_option = writer.render('Items', antialias, white, black)
+use_option = writer.render('Use', antialias, white, black)
+equip_option = writer.render('Equip', antialias, white, black)
 
 arrow_img = pygame.image.load('images/arrow.gif')
 
@@ -94,9 +96,12 @@ class WorldMenu(BaseMenu):
             return lambda frame_num: no_talker
 
 class TalkMenu(object):
+    @staticmethod
+    def render_speach(text_lines):
+        return map(lambda text: writer.render(text, antialias, white, black), text_lines)
+
     def __init__(self, speech_parts):
-        self.speech_parts = map(lambda text: writer.render(text, False, white, black), 
-                                speech_parts)
+        self.speech_parts = map(lambda text: TalkMenu.render_speach(text), speech_parts)
         self.speech_idx = 0
 
         self.pos = (100, 350)
@@ -107,7 +112,9 @@ class TalkMenu(object):
         screen.fill(white, self.white_box)
         screen.fill(black, self.inside_box)
 
-        screen.blit(self.speech_parts[self.speech_idx], self.speech_box)
+        for line_idx in range(len(self.speech_parts[self.speech_idx])):
+            text = self.speech_parts[self.speech_idx][line_idx]
+            screen.blit(text, self.speech_box(line_idx))
 
     @property
     def white_box(self):
@@ -122,11 +129,11 @@ class TalkMenu(object):
         new_size = (white_box[2] - 4, white_box[3] - 4)
         return new_pos + new_size
 
-    @property
-    def speech_box(self):
+    def speech_box(self, line_num):
         inside_box = self.inside_box
-        speech_pos = (inside_box[0] + 10, inside_box[1] + 10)
-        speech_size = (inside_box[2] - 5, inside_box[3] - 5)
+        y_offset = line_num * (font_height + 3)
+        speech_pos = (inside_box[0] + 10, inside_box[1] + 10 + y_offset)
+        speech_size = (inside_box[2] - 5, font_height)
         return speech_pos + speech_size
 
     def selected(self):
@@ -139,4 +146,9 @@ class TalkMenu(object):
         pass
 
 
-no_talker = TalkMenu(['There is no one here.'])
+no_talker = TalkMenu([['There is no one',
+                       'here. Newline test.',
+                       'more testing on a really long line',
+                       'the 4th line followed by',
+                       'the 5th and last line.',
+                       'trying a 6th?']])
