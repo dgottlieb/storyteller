@@ -24,7 +24,7 @@ class NPC(object):
         return 64
 
     def walk(self, frame, hero_pos, new_hero_pos):
-        if self.moving:
+        if self.moving or len(self.path) == 0:
             return
 
         actions = self.path[(self.row, self.col)]
