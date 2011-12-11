@@ -8,8 +8,6 @@ import chars
 import sounds
 import tiled_screen
 
-keys_down = set([])
-
 if __name__ == '__main__':
     pygame.init()
     pygame.mouse.set_visible(0)
@@ -28,6 +26,7 @@ if __name__ == '__main__':
     game_on = True
 
     pending_inputs = []
+    keys_down = set([])
     while game_on:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
