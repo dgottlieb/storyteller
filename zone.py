@@ -97,3 +97,25 @@ class Zone(object):
             return tile.get('wall', False)
 
         return False
+
+    def get_tile_info(self, row_idx, col_idx):
+        if row_idx < 0 or row_idx >= len(self.map):
+            return {}
+        if col_idx < 0 or col_idx >= len(self.map[row_idx]):
+            return {}
+
+        tile = self.map[row_idx][col_idx]
+        if isinstance(tile, str): #tile is a basic square
+            return {}
+
+        return tile #tile is a dictionary
+
+    def get_npc_at(self, row_idx, col_idx):
+        for npc in self.npcs:
+            if npc.perc_moved < 0.05 and npc.row == row_idx and npc.col == col_idx:
+                return npc
+
+            if npc.perc_moved > 0.95 and npc.new_row == row_idx and npc.new_col == col_idx:
+                return npc
+
+        return None

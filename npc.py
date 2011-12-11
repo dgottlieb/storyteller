@@ -11,6 +11,10 @@ class NPC(object):
 
         self.offset_row = 0
         self.offset_col = 0
+        self.perc_moved = 0.0
+
+        self.dialogue = [['This human is strangely quiet. Almost as if God',
+                          'had forgotten to tell it what to say.']]
 
     def get_sprite(self, frame_number, frames_per_twitch):
         return self.sprites[(frame_number / frames_per_twitch) % len(self.sprites)]
@@ -37,7 +41,7 @@ class NPC(object):
         if new_row == new_hero_pos[0] and new_col == new_hero_pos[1]:
             return
 
-        #maybe some wall detection logic here too. Wuld require a handle on the map
+        #maybe some wall detection logic here too. Would require a handle on the map
         #the map should probably be part of the constructor
 
         if self.frame + (tiled_screen.FPS * actions[1]) <= frame:
@@ -49,13 +53,18 @@ class NPC(object):
             self.new_row = new_row
             self.new_col = new_col
 
+    def set_dialogue(self, dialogue):
+        self.dialogue = dialogue
+
     def motion(self, frame):
         if not self.moving:
             return
 
         frames_passed = frame - self.start_frame
-        self.offset_row = 1.0 * self.height * self.direction[0] * frames_passed / self.num_frames
-        self.offset_col = 1.0 * self.width * self.direction[1] * frames_passed / self.num_frames
+        self.perc_moved = 1.0 * frames_passed / self.num_frames
+
+        self.offset_row = self.perc_moved * self.height * self.direction[0]
+        self.offset_col = self.perc_moved * self.width * self.direction[1]
 
         if frame >= self.start_frame + self.num_frames:
             self.moving = False
@@ -65,6 +74,7 @@ class NPC(object):
 
             self.offset_row = 0
             self.offset_col = 0
+            self.perc_moved = 0.0
 
             self.row = self.row + self.direction[0]
             self.col = self.col + self.direction[1]

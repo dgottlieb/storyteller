@@ -91,7 +91,6 @@ class WorldMenu(BaseMenu):
                       (status_option, items_option), 
                       (use_option, equip_option)]
         BaseMenu.__init__(self, start_frame_num, (40, 30), menu_items)
-        self.NO_TALKER = TalkMenu([['There is no one here.']])
 
     def selected(self):
         selected_item = self.menu_items[self.selection[0]][self.selection[1]]

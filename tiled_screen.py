@@ -95,7 +95,7 @@ class Screen(object):
                 self.grid[row_idx][col_idx] = tile
 
     def set_hero_orientation(self, direction):
-        self._hero_direction = DIRECTIONS[direction]
+        self._hero_direction = direction
 
         orientation_slice = ORIENTATION[direction]
         self._hero_orientation = self.hero_animations.__getslice__(orientation_slice[0],
@@ -256,11 +256,10 @@ class Screen(object):
             self.moving((self.moving_rows, self.moving_cols))
 
     def get_facing_square(self):
-        row, column = self.hero_pos
-        row += self.moving_rows
-        column += self.moving_cols
+        row, column = self.hero_pos 
+        delta_row, delta_column = DIRECTIONS[self._hero_direction]
 
-        
+        return row + delta_row, column + delta_column
 
     def open_menu(self, new_menu=None):
         self.game_state = MENU

@@ -5,6 +5,7 @@ import time
 import pygame
 
 import chars
+import menu
 import sounds
 import tiled_screen
 
@@ -106,7 +107,16 @@ if __name__ == '__main__':
                         screen.close_all_menus()
                     elif action == 'talk':
                         row, col = screen.get_facing_square()
-                        #npc_at = 
+
+                        npc = screen.zone.get_npc_at(row, col)
+                        dialogue = npc and npc.dialogue
+
+                        if not dialogue:
+                            tile_info = screen.zone.get_tile_info(row, col)
+                            dialogue = tile_info.get('dialogue', [['There is no one here.']])
+
+                        talk_menu = menu.TalkMenu(dialogue)
+                        screen.open_menu(talk_menu)
                     else:
                         screen.open_menu(action)
 
