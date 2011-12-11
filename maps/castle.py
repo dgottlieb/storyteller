@@ -57,7 +57,9 @@ class Castle(zone.Zone):
         if tile_str == 'K0':
             walk_path = {}
             king = npc.NPC(chars.get_king(), row, column, walk_path)
+            dialogue = [["Nothing here yet."]]
             return {'tile': tiles.brick_tile,
+                    'dialogue': dialogue,
                     'npc': king}
 
     def special_actions(self, tile):

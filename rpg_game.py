@@ -92,10 +92,15 @@ if __name__ == '__main__':
                     screen.close_menu()
                     screen.draw_world()
                 elif key in (273, 274, 275, 276):
-                    screen.menu[-1].move_selection(key)
+                    screen.menu[-1].move_selection(key, screen.total_frames)
                 elif key == 122:
                     #Z
                     action = screen.menu[-1].selected()
+                    if not action:
+                        screen.draw()
+                        clock.tick(tiled_screen.FPS)
+                        continue
+
                     if action == 'close':
                         screen.close_menu()
                     elif action == 'close_all':

@@ -37,6 +37,9 @@ class NPC(object):
         if new_row == new_hero_pos[0] and new_col == new_hero_pos[1]:
             return
 
+        #maybe some wall detection logic here too. Wuld require a handle on the map
+        #the map should probably be part of the constructor
+
         if self.frame + (tiled_screen.FPS * actions[1]) <= frame:
             self.moving = True
             self.direction = actions[0]

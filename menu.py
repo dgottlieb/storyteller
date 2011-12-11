@@ -18,11 +18,12 @@ items_option = writer.render('Items', antialias, white, black)
 use_option = writer.render('Use', antialias, white, black)
 equip_option = writer.render('Equip', antialias, white, black)
 
-arrow_img = pygame.image.load('images/arrow.gif')
+right_arrow_img = pygame.image.load('images/right-arrow.gif')
+down_arrow_img = pygame.image.load('images/down-arrow.gif')
 
 class BaseMenu(object):
     def __init__(self, start_frame_num, pos, menu_items):
-        self.arrow_img = arrow_img.convert()
+        self.arrow_img = right_arrow_img.convert()
         self.arrow_size = (40, 10)
 
         self.start_frame_num = start_frame_num
@@ -40,7 +41,7 @@ class BaseMenu(object):
         screen.fill(white, self.white_box)
         screen.fill(black, self.inside_box)
 
-        blit_arrow = ((frame_num - self.start_frame_num) / 10) % 5 < 3
+        blit_arrow = (frame_num - self.start_frame_num) % 100 < 60
 
         first_pos = (self.pos[0] + 40, self.pos[1] + 20)
         size = (200, 10)
@@ -69,7 +70,7 @@ class BaseMenu(object):
         new_size = (white_box[2] - 4, white_box[3] - 4)
         return new_pos + new_size
 
-    def move_selection(self, input_code):
+    def move_selection(self, input_code, frame_num):
         move_map = {273: (-1, 0), #UP
                     274: (1, 0), #DOWN
                     275: (0, 1), #RIGHT
@@ -82,18 +83,28 @@ class BaseMenu(object):
         self.selection[0] = (self.selection[0]) % len(self.menu_items)
         self.selection[1] = (self.selection[1]) % len(self.menu_items[0])
 
+        self.start_frame_num = frame_num
+
 class WorldMenu(BaseMenu):
     def __init__(self, start_frame_num):
         menu_items = [(talk_option, spells_option), 
                       (status_option, items_option), 
                       (use_option, equip_option)]
         BaseMenu.__init__(self, start_frame_num, (40, 30), menu_items)
+        self.NO_TALKER = TalkMenu([['There is no one',
+                               'here. Newline test.',
+                               'more testing on a really long line',
+                               'the 4th line followed by',
+                               'the 5th and last line.'],
+                              ['and a following page',
+                               'and one more line for good measure']])
+
 
     def selected(self):
         selected_item = self.menu_items[self.selection[0]][self.selection[1]]
         if selected_item == talk_option:
-            no_talker.speech_idx = 0
-            return lambda frame_num: no_talker
+            self.NO_TALKER.speech_idx = 0
+            return lambda frame_num: self.NO_TALKER
 
 class TalkMenu(object):
     @staticmethod
@@ -101,6 +112,7 @@ class TalkMenu(object):
         return map(lambda text: writer.render(text, antialias, white, black), text_lines)
 
     def __init__(self, speech_parts):
+        self.arrow_img = down_arrow_img.convert()
         self.speech_parts = map(lambda text: TalkMenu.render_speach(text), speech_parts)
         self.speech_idx = 0
 
@@ -115,6 +127,9 @@ class TalkMenu(object):
         for line_idx in range(len(self.speech_parts[self.speech_idx])):
             text = self.speech_parts[self.speech_idx][line_idx]
             screen.blit(text, self.speech_box(line_idx))
+
+        if self.speech_idx + 1 < len(self.speech_parts):
+            self.blit_next_arrow(screen, frame)
 
     @property
     def white_box(self):
@@ -141,14 +156,19 @@ class TalkMenu(object):
         if self.speech_idx == len(self.speech_parts):
             return 'close_all'
 
-    def move_selection(self, key):
+        return None
+
+    def move_selection(self, key, frame_num):
         #talk menus have no actions, ignore arrow keys
         pass
 
+    def blit_next_arrow(self, screen, frame_num):
+        if frame_num % 100 < 40:
+            return
 
-no_talker = TalkMenu([['There is no one',
-                       'here. Newline test.',
-                       'more testing on a really long line',
-                       'the 4th line followed by',
-                       'the 5th and last line.',
-                       'trying a 6th?']])
+        inside_box = self.inside_box
+        arrow_pos = ((2*inside_box[0] + inside_box[2]) / 2 - self.arrow_img.get_width() / 2,
+                     (inside_box[1] + inside_box[3]) - self.arrow_img.get_height() - 5)
+        arrow_size = (40, 20)
+
+        screen.blit(self.arrow_img, arrow_pos + arrow_size)
