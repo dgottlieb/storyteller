@@ -240,6 +240,7 @@ class Screen(object):
         self.game_state = MENU
         if not menu_func:
             self.menu.append(menu.WorldMenu(self.total_frames))
+            self.menu[-1].blit_menu(self.screen, self.total_frames)
         else:
             self.menu.append(menu_func(self.total_frames))
 

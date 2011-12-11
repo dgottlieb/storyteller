@@ -26,6 +26,8 @@ if __name__ == '__main__':
     start = time.time()
 
     game_on = True
+
+    pending_inputs = []
     while game_on:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -62,10 +64,14 @@ if __name__ == '__main__':
                     screen.set_walking_speed(2.5*tiled_screen.MPS)
                 elif key == 122:
                     #Z
-                    if not screen.menu:
-                        sounds.beep_sound.play()
-                        screen.open_menu()
+                    if screen.motioning:
+                        screen.stop_walking()
+                        pygame.event.post(event)
                         continue
+
+                    sounds.beep_sound.play()
+                    screen.open_menu()
+                    continue
 
             if event.type == pygame.KEYUP:
                 if key in keys_down:

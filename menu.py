@@ -38,7 +38,7 @@ class BaseMenu(object):
         screen.fill(white, self.white_box)
         screen.fill(black, self.inside_box)
 
-        blit_arrow = ((frame_num - self.start_frame_num) / 10) % 5 > 1
+        blit_arrow = ((frame_num - self.start_frame_num) / 10) % 5 < 3
 
         first_pos = (self.pos[0] + 40, self.pos[1] + 20)
         size = (200, 10)
@@ -133,5 +133,10 @@ class TalkMenu(object):
         self.speech_idx += 1
         if self.speech_idx == len(self.speech_parts):
             return 'close_all'
+
+    def move_selection(self, key):
+        #talk menus have no actions, ignore arrow keys
+        pass
+
 
 no_talker = TalkMenu(['There is no one here.'])
