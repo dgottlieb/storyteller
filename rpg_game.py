@@ -105,6 +105,9 @@ if __name__ == '__main__':
                         screen.close_menu()
                     elif action == 'close_all':
                         screen.close_all_menus()
+                    elif action == 'talk':
+                        row, col = screen.get_facing_square()
+                        #npc_at = 
                     else:
                         screen.open_menu(action)
 

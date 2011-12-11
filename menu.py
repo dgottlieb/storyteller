@@ -91,20 +91,12 @@ class WorldMenu(BaseMenu):
                       (status_option, items_option), 
                       (use_option, equip_option)]
         BaseMenu.__init__(self, start_frame_num, (40, 30), menu_items)
-        self.NO_TALKER = TalkMenu([['There is no one',
-                               'here. Newline test.',
-                               'more testing on a really long line',
-                               'the 4th line followed by',
-                               'the 5th and last line.'],
-                              ['and a following page',
-                               'and one more line for good measure']])
-
+        self.NO_TALKER = TalkMenu([['There is no one here.']])
 
     def selected(self):
         selected_item = self.menu_items[self.selection[0]][self.selection[1]]
         if selected_item == talk_option:
-            self.NO_TALKER.speech_idx = 0
-            return lambda frame_num: self.NO_TALKER
+            return 'talk'
 
 class TalkMenu(object):
     @staticmethod

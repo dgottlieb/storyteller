@@ -15,6 +15,21 @@ WORLD = 0
 MENU = 1
 FIGHT = 2
 
+UP = 'UP'
+DOWN = 'DOWN'
+LEFT = 'LEFT'
+RIGHT = 'RIGHT'
+
+DIRECTIONS = {UP: (-1, 0),
+              DOWN: (1, 0),
+              LEFT: (0, -1),
+              RIGHT: (0, 1)}
+
+ORIENTATION = {UP: chars.UP,
+               DOWN: chars.DOWN,
+               LEFT: chars.LEFT,
+               RIGHT: chars.RIGHT}
+
 class Screen(object):
     def __init__(self, rows, columns, tile_width, tile_height):
         self.rows = rows + 2
@@ -38,7 +53,7 @@ class Screen(object):
         self.set_walking_speed(MPS)
 
         self.hero_pos = self.hero_new_pos = [1, 2] #load from savegame
-        self.set_hero_orientation(chars.DOWN)
+        self.set_hero_orientation(DOWN)
 
         self.hero_rect = (columns/2 * tile_width, rows/2 * tile_height,
                           tile_width, tile_height)
@@ -79,11 +94,15 @@ class Screen(object):
                 tile = self.zone.get_tile(map_row_idx, map_col_idx)
                 self.grid[row_idx][col_idx] = tile
 
-    def set_hero_orientation(self, orientation_slice):
+    def set_hero_orientation(self, direction):
+        self._hero_direction = DIRECTIONS[direction]
+
+        orientation_slice = ORIENTATION[direction]
         self._hero_orientation = self.hero_animations.__getslice__(orientation_slice[0],
                                                                    orientation_slice[1])
 
-    def moving(self, row_change, col_change):
+    def moving(self, tile_change):
+        row_change, col_change = tile_change
         new_row = self.hero_pos[0] + row_change
         new_col = self.hero_pos[1] + col_change
         if self.zone.is_wall(new_row, new_col):
@@ -123,32 +142,32 @@ class Screen(object):
             self._next = self.walking_up
             return
 
-        self.moving(-1, 0)
-        self.set_hero_orientation(chars.UP)
+        self.moving(DIRECTIONS[UP])
+        self.set_hero_orientation(UP)
 
     def walking_down(self):
         if self.motioning:
             self._next = self.walking_down
             return
 
-        self.moving(1, 0)
-        self.set_hero_orientation(chars.DOWN)
+        self.moving(DIRECTIONS[DOWN])
+        self.set_hero_orientation(DOWN)
 
     def walking_left(self):
         if self.motioning:
             self._next = self.walking_left
             return
 
-        self.moving(0, -1)
-        self.set_hero_orientation(chars.LEFT)
+        self.moving(DIRECTIONS[LEFT])
+        self.set_hero_orientation(LEFT)
 
     def walking_right(self):
         if self.motioning:
             self._next = self.walking_right
             return
 
-        self.moving(0, 1)
-        self.set_hero_orientation(chars.RIGHT)
+        self.moving(DIRECTIONS[RIGHT])
+        self.set_hero_orientation(RIGHT)
 
     def set_hero_tps(self, tps):
         self.hero_tps = tps
@@ -234,15 +253,22 @@ class Screen(object):
             self.motioning = False
         else:
             #button is still held down, let's keep moving
-            self.moving(self.moving_rows, self.moving_cols)
+            self.moving((self.moving_rows, self.moving_cols))
 
-    def open_menu(self, menu_func=None):
+    def get_facing_square(self):
+        row, column = self.hero_pos
+        row += self.moving_rows
+        column += self.moving_cols
+
+        
+
+    def open_menu(self, new_menu=None):
         self.game_state = MENU
-        if not menu_func:
+        if not new_menu:
             self.menu.append(menu.WorldMenu(self.total_frames))
             self.menu[-1].blit_menu(self.screen, self.total_frames)
         else:
-            self.menu.append(menu_func(self.total_frames))
+            self.menu.append(new_menu)
 
     def close_menu(self):
         self.menu.pop()
