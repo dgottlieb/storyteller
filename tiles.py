@@ -9,11 +9,11 @@ grass_tile = tiles_sheet.get_item(1, 2, 64, 64)
 
 brick_tile = tiles_sheet.get_item(0, 3, 64, 64)
 wall_tile = tiles_sheet.get_item(0, 0, 64, 64)
+stone_tile = tiles_sheet.get_item(0, 1, 64, 64)
+throne_tile = tiles_sheet.get_item(0, 2, 64, 64)
 
 stair_down_tile = tiles_sheet.get_item(0, 6, 64, 64)
 stair_up_tile = tiles_sheet.get_item(0, 7, 64, 64)
-
-throne_tile = tiles_sheet.get_item(0, 1, 64, 64)
 
 castle_tile = tiles_sheet.get_item(1, 0, 64, 64)
 ocean_1_tile = tiles_sheet.get_item(2, 2, 64, 64)

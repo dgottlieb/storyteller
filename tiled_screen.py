@@ -52,7 +52,7 @@ class Screen(object):
         self.set_hero_tps(TPS)
         self.set_walking_speed(MPS)
 
-        self.hero_pos = self.hero_new_pos = [1, 2] #load from savegame
+        self.hero_pos = self.hero_new_pos = [2, 3] #load from savegame
         self.set_hero_orientation(DOWN)
 
         self.hero_rect = (columns/2 * tile_width, rows/2 * tile_height,

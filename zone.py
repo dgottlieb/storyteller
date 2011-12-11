@@ -8,6 +8,7 @@ basic_tile_map = {'W': wall_tile,
                   'H': hill_tile,
                   'G': grass_tile,
                   'T': throne_tile,
+                  'S': stone_tile,
                   '.': None}
 
 class Zone(object):
@@ -90,7 +91,7 @@ class Zone(object):
 
     def is_wall(self, row_idx, col_idx):
         tile = self.map[row_idx][col_idx]
-        if tile in ('W', 'M', 'T'):
+        if tile in ('W', 'M', 'T', 'S'):
             return True
 
         if isinstance(tile, dict):
