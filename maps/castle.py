@@ -1,7 +1,7 @@
 castle = [
 "..W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.W.",
-"..W.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.W.",
-"..W.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.W.",
+"..W.B.B.B.T.T.T.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.W.",
+"..W.B.B.B.T.K0T.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.W.",
 "..W.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.W.",
 "..W.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.W.",
 "..W.B.B.B.M0B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.W.",
@@ -53,6 +53,12 @@ class Castle(zone.Zone):
             merchant = npc.NPC(chars.get_merchant(), row, column, walk_path)
             return {'tile': tiles.brick_tile,
                     'npc': merchant}
+
+        if tile_str == 'K0':
+            walk_path = {}
+            king = npc.NPC(chars.get_king(), row, column, walk_path)
+            return {'tile': tiles.brick_tile,
+                    'npc': king}
 
     def special_actions(self, tile):
         pass
