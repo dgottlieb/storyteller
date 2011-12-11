@@ -30,6 +30,7 @@ class Screen(object):
         self.height = tile_height * rows
 
         self.total_frames = 0
+        self.world_frames = 0
         self.screen = pygame.display.set_mode(self.size)
 
         self.hero_animations = chars.get_hero()
@@ -109,7 +110,7 @@ class Screen(object):
         self.motioning = True
         self.stop_moving = False
 
-        self.start_frame = self.total_frames
+        self.start_frame = self.world_frames
         self.num_frames = FPS / self.mps
 
         self.moving_rows = row_change
@@ -175,7 +176,7 @@ class Screen(object):
 
     def blit_hero(self):
         frames_per_twitch = (FPS / self.hero_tps)
-        hero_frame_idx = (self.total_frames / frames_per_twitch) % len(self._hero_orientation)
+        hero_frame_idx = (self.world_frames / frames_per_twitch) % len(self._hero_orientation)
         self.screen.blit(self._hero_orientation[hero_frame_idx], self.hero_rect)
 
     def blit_npcs(self):
@@ -189,7 +190,7 @@ class Screen(object):
                 continue                    
 
             frames_per_twitch = (FPS / self.hero_tps)
-            npc_sprite = npc.get_sprite(self.total_frames, frames_per_twitch)
+            npc_sprite = npc.get_sprite(self.world_frames, frames_per_twitch)
 
             start_x = npc.width * (rel_col - 1) + npc.offset_col - self.col_offset
             start_y = npc.height * (rel_row - 1) + npc.offset_row - self.row_offset
@@ -197,13 +198,13 @@ class Screen(object):
 
     def motion(self):
         for npc in self.zone.npcs:
-            npc.walk(self.total_frames, self.hero_pos, self.hero_new_pos)
-            npc.motion(self.total_frames)
+            npc.walk(self.world_frames, self.hero_pos, self.hero_new_pos)
+            npc.motion(self.world_frames)
 
         if self.motioning == False:
             return
 
-        perc_change = 1.0 * (self.total_frames - self.start_frame) / self.num_frames
+        perc_change = 1.0 * (self.world_frames - self.start_frame) / self.num_frames
         if perc_change < 1.0:
             self.row_offset = int(self.moving_rows * self.tile_height * perc_change)
             self.col_offset = int(self.moving_cols * self.tile_width * perc_change)
@@ -251,15 +252,20 @@ class Screen(object):
         while self.menu:
             self.close_menu()
 
+    def draw_world(self):
+        self.screen.fill(black)
+        self.blit_map()
+        self.blit_hero()
+        self.blit_npcs()
+
     def draw(self):
         if not self.menu:
-            self.screen.fill(black)
-            self.blit_map()
-            self.blit_hero()
-            self.blit_npcs()
+            self.draw_world()
         else:
             self.menu[-1].blit_menu(self.screen, self.total_frames)
 
         pygame.display.flip()
 
+        if self.game_state == WORLD:
+            self.world_frames += 1
         self.total_frames += 1

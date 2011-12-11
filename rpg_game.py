@@ -24,9 +24,6 @@ if __name__ == '__main__':
 
     clock = pygame.time.Clock()
     start = time.time()
-    total_frames = 0
-
-    next_possible_menu_input_frame = 0
 
     game_on = True
     while game_on:
@@ -69,8 +66,7 @@ if __name__ == '__main__':
                         sounds.beep_sound.play()
                         screen.open_menu()
                         continue
-                
-            
+
             if event.type == pygame.KEYUP:
                 if key in keys_down:
                     keys_down.remove(key)
@@ -87,13 +83,10 @@ if __name__ == '__main__':
 
                 if key == 120:
                     #X
-                    screen.close_all_menus()
+                    screen.close_menu()
+                    screen.draw_world()
                 elif key in (273, 274, 275, 276):
-                    if screen.total_frames < next_possible_menu_input_frame:
-                        continue
-
                     screen.menu[-1].move_selection(key)
-                    #next_possible_menu_input_frame = screen.total_frames + (0.25 * tiled_screen.FPS)
                 elif key == 122:
                     #Z
                     action = screen.menu[-1].selected()
