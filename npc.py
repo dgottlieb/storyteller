@@ -1,4 +1,10 @@
+import chars
 import tiled_screen
+
+move_vector_to_orientation = {(1, 0): chars.DOWN,
+			      (-1, 0): chars.UP,
+			      (0, 1): chars.RIGHT,
+			      (0, -1): chars.LEFT}
 
 class NPC(object):
     def __init__(self, sprites, row, col, path):
@@ -17,7 +23,13 @@ class NPC(object):
                           'had forgotten to tell it what to say.']]
 
     def get_sprite(self, frame_number, frames_per_twitch):
-        return self.sprites[(frame_number / frames_per_twitch) % len(self.sprites)]
+	frame_idx = frame_number / frames_per_twitch
+	if self.moving:
+	    orientation_slice = move_vector_to_orientation[self.direction]
+	    orientation = self.sprites.__getslice__(orientation_slice[0], orientation_slice[1])
+	    return orientation[frame_idx % len(orientation)]
+	    
+        return self.sprites[frame_idx % len(self.sprites)]
 
     @property
     def width(self):
