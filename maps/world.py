@@ -10,8 +10,9 @@ world = [
 
 import pygame
 
-import chars
 import castle
+import chars
+import combat
 import tiled_screen
 import zone
 
@@ -21,6 +22,8 @@ class World(zone.Zone):
         self.map = self.parse_map(world)
         self.background = zone.ocean_5_tile
         self.music_file = 'sounds/dw1overw.mid'
+
+	self.combat_manager = combat.CombatManager(15, 4)
 
     def parse_tile(self, tile_str, row, column):
         if tile_str == 'C0':

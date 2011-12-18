@@ -1,5 +1,7 @@
 import rpg_game
 import sounds
+import tiled_screen
+
 from tiles import *
 
 basic_tile_map = {'W': wall_tile,
@@ -16,6 +18,8 @@ class Zone(object):
         self.background = None
         self.npcs = []
         self.locations = {}
+
+	self.combat_manager = None
 
     def music(self):
         sounds.play_music(self.music_file)
@@ -57,6 +61,17 @@ class Zone(object):
 
     def take_actions(self, screen):
         tile = self.map[screen.hero_pos[0]][screen.hero_pos[1]]
+	if self.combat_manager:
+	    fight = self.combat_manager.step(tile)
+	    if 'fight' in tile:
+		pass
+
+	    if fight:
+		screen.game_state = tiled_screen.FIGHT
+		self.combat_manager.generate_fight()
+		screen.stop_walking()
+		return None
+
         if not isinstance(tile, dict):
             return None
 
@@ -67,8 +82,6 @@ class Zone(object):
             screen.hero_pos = new_zone.get_position(tile['exit'][1])
             screen.set_hero_orientation(tile['exit'][2])
             screen.stop_walking()
-
-            return
             
 
     def get_tile(self, row_idx, col_idx):

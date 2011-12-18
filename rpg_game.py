@@ -120,6 +120,7 @@ if __name__ == '__main__':
                     else:
                         screen.open_menu(action)
 
+
         screen.draw()
         clock.tick(tiled_screen.FPS)
 

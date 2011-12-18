@@ -285,10 +285,13 @@ class Screen(object):
         self.blit_npcs()
 
     def draw(self):
-        if not self.menu:
-            self.draw_world()
-        else:
+        if self.game_state == MENU:
             self.menu[-1].blit_menu(self.screen, self.total_frames)
+	elif self.game_state == FIGHT:
+	    self.zone.combat_manager.draw_combat()
+	    self.game_state = WORLD
+        elif self.game_state == WORLD:
+            self.draw_world()
 
         pygame.display.flip()
 
