@@ -1,4 +1,5 @@
 import random
+import sounds
 
 class CombatManager(object):
     def __init__(self, average_steps_to_fight, deviation):
@@ -23,8 +24,12 @@ class CombatManager(object):
 
 	return False
 
-    def generate_fight(self):
+    def input(self, pygame_event):
+	pass
+
+    def generate_fight(self, frame_num):
+	sounds.play_random_battle_song()
 	print 'making a fight'
 
-    def draw_combat(self):
-	print 'drawing combat'
+    def draw_combat(self, frame_num):
+	pass

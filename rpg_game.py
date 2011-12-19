@@ -73,6 +73,11 @@ if __name__ == '__main__':
                     screen.open_menu()
                     continue
 
+	    if screen.game_state == tiled_screen.FIGHT and \
+		    event.type == pygame.KEYDOWN:
+		screen.zone.combat_manager.input(event)
+		continue
+
             if event.type == pygame.KEYUP:
                 if key in keys_down:
                     keys_down.remove(key)
