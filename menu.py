@@ -18,6 +18,10 @@ items_option = writer.render('Items', antialias, white, black)
 use_option = writer.render('Use', antialias, white, black)
 equip_option = writer.render('Equip', antialias, white, black)
 
+fight_option = writer.render('Fight', antialias, white, black)
+combat_spell_option = writer.render('Spell', antialias, white, black)
+combat_items_option = writer.render('Item', antialias, white, black)
+
 right_arrow_img = pygame.image.load('images/right-arrow.gif')
 down_arrow_img = pygame.image.load('images/down-arrow.gif')
 
@@ -56,6 +60,9 @@ class BaseMenu(object):
                 if blit_arrow and [row_idx, col_idx] == self.selection:
                     arrow_pos = (pos[0] - 24, pos[1] + 3)
                     screen.blit(self.arrow_img, arrow_pos + self.arrow_size)
+
+    def hide(self, screen):
+        screen.fill(black, (self.pos + self.size))
 
     @property
     def white_box(self):
@@ -96,6 +103,16 @@ class WorldMenu(BaseMenu):
         selected_item = self.menu_items[self.selection[0]][self.selection[1]]
         if selected_item == talk_option:
             return 'talk'
+
+class FightMenu(BaseMenu):
+    def __init__(self, start_frame_num):
+        menu_items = [(fight_option,), (combat_spell_option,), (combat_items_option,)]
+        BaseMenu.__init__(self, start_frame_num, (40, 375), menu_items)
+
+    def selected(self):
+        selected_item = self.menu_items[self.selection[0]][0]
+        if selected_item == fight_option:
+            return 'attack'
 
 class TalkMenu(object):
     @staticmethod
