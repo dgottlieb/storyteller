@@ -75,7 +75,11 @@ if __name__ == '__main__':
 
 	    if screen.game_state == tiled_screen.FIGHT and \
 		    event.type == pygame.KEYDOWN:
-		screen.zone.combat_manager.input(event)
+		action = screen.zone.combat_manager.input(event)
+                if action == 'fight_over':
+                    screen.game_state = tiled_screen.WORLD
+                    screen.zone.music()
+
 		continue
 
             if event.type == pygame.KEYUP:

@@ -23,7 +23,7 @@ class World(zone.Zone):
         self.background = zone.ocean_5_tile
         self.music_file = 'sounds/dw1overw.mid'
 
-	self.combat_manager = combat.CombatManager(15, 4)
+	self.combat_manager = combat.CombatManager(1, 0)
 
     def parse_tile(self, tile_str, row, column):
         if tile_str == 'C0':
