@@ -294,7 +294,11 @@ class MapWindow(wx.Frame):
     def OnSave(self, evt):
         colCount = self.grid.GetNumberCols()
         rowCount = self.grid.GetNumberRows()
+	print self.mapName
         print colCount, ", ", rowCount
+	output_file = file('./%s.py' % (self.mapName,), 'w')
+	output_file.write('string goes here\n')
+	output_file.close()
             
 
     def OnCellLeftClick(self, evt):
