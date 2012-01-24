@@ -1,3 +1,5 @@
+import time
+
 import pygame
 
 import chars
@@ -5,8 +7,9 @@ import menu
 import sounds
 
 black = (0, 0, 0)
+black_tile = pygame.Surface((64, 64))
 white = (255, 255, 255)
-FPS = 20
+FPS = 50
 
 TPS = 2 #Twitches per second, characters transitioning between different states
 MPS = 3 #Movement per second, how many tiles the hero can walk per second
@@ -44,8 +47,12 @@ class Screen(object):
         self.width = tile_width * columns
         self.height = tile_height * rows
 
-        self.total_frames = 0
         self.world_frames = 0
+	self.total_frames = 0
+
+	self.world_time = 0
+	self.total_time = 0
+
         self.screen = pygame.display.set_mode(self.size)
 
         self.hero_animations = chars.get_hero()
@@ -129,8 +136,8 @@ class Screen(object):
         self.motioning = True
         self.stop_moving = False
 
-        self.start_frame = self.world_frames
-        self.num_frames = FPS / self.mps
+        self.start_time = self.world_time
+	self.num_time = 1.0 / self.mps * 1000
 
         self.moving_rows = row_change
         self.moving_cols = col_change
@@ -184,19 +191,16 @@ class Screen(object):
             for col_idx in range(len(self.grid[row_idx])):
                 tile = self.grid[row_idx][col_idx]
                 if not tile:
-                    if self.zone.background:
-                        tile = self.zone.background
-                    else:
-                        continue
+		    tile = self.zone.background or black_tile
 
                 start_x = self.tile_width * (col_idx - 1) - self.col_offset
                 start_y = self.tile_height * (row_idx - 1) - self.row_offset
                 self.screen.blit(tile, (start_x, start_y, self.tile_width, self.tile_height))
 
     def blit_hero(self):
-        frames_per_twitch = (FPS / self.hero_tps)
-        hero_frame_idx = (self.world_frames / frames_per_twitch) % len(self._hero_orientation)
-        self.screen.blit(self._hero_orientation[hero_frame_idx], self.hero_rect)
+        seconds_per_twitch = (1.0 / self.hero_tps)
+        hero_sprite_idx = int(self.world_time / seconds_per_twitch / 1000) % len(self._hero_orientation)
+        self.screen.blit(self._hero_orientation[hero_sprite_idx], self.hero_rect)
 
     def blit_npcs(self):
         for npc in self.zone.npcs:
@@ -208,8 +212,8 @@ class Screen(object):
             if rel_col < 0 or rel_col > self.columns:
                 continue                    
 
-            frames_per_twitch = (FPS / self.hero_tps)
-            npc_sprite = npc.get_sprite(self.world_frames, frames_per_twitch)
+            seconds_per_twitch = (1.0 / self.hero_tps)
+            npc_sprite = npc.get_sprite(self.world_time, seconds_per_twitch)
 
             start_x = npc.width * (rel_col - 1) + npc.offset_col - self.col_offset
             start_y = npc.height * (rel_row - 1) + npc.offset_row - self.row_offset
@@ -217,13 +221,13 @@ class Screen(object):
 
     def motion(self):
         for npc in self.zone.npcs:
-            npc.walk(self.world_frames, self.hero_pos, self.hero_new_pos)
-            npc.motion(self.world_frames)
+            npc.walk(self.world_time, self.hero_pos, self.hero_new_pos)
+            npc.motion(self.world_time)
 
         if self.motioning == False:
             return
 
-        perc_change = 1.0 * (self.world_frames - self.start_frame) / self.num_frames
+        perc_change = 1.0 * (self.world_time - self.start_time) / self.num_time
         if perc_change < 1.0:
             self.row_offset = int(self.moving_rows * self.tile_height * perc_change)
             self.col_offset = int(self.moving_cols * self.tile_width * perc_change)
@@ -264,8 +268,8 @@ class Screen(object):
     def open_menu(self, new_menu=None):
         self.game_state = MENU
         if not new_menu:
-            self.menu.append(menu.WorldMenu(self.total_frames))
-            self.menu[-1].blit_menu(self.screen, self.total_frames)
+            self.menu.append(menu.WorldMenu(self.total_time)) #WorldMenu(frames)
+            self.menu[-1].blit_menu(self.screen, self.total_time) #blit_menu(screen, frames)
         else:
             self.menu.append(new_menu)
 
@@ -279,16 +283,15 @@ class Screen(object):
             self.close_menu()
 
     def draw_world(self):
-        self.screen.fill(black)
         self.blit_map()
         self.blit_hero()
         self.blit_npcs()
 
-    def draw(self):
+    def draw(self, time_elapsed):
         if self.game_state == MENU:
-            self.menu[-1].blit_menu(self.screen, self.total_frames)
+            self.menu[-1].blit_menu(self.screen, self.total_time) #blit_menu(screen, frames)
 	elif self.game_state == FIGHT:
-	    self.zone.combat_manager.draw_combat(self, self.total_frames)
+	    self.zone.combat_manager.draw_combat(self, self.total_time) #draw_combat(self, frames)
 	    #self.game_state = WORLD
         elif self.game_state == WORLD:
             self.draw_world()
@@ -297,4 +300,7 @@ class Screen(object):
 
         if self.game_state == WORLD:
             self.world_frames += 1
-        self.total_frames += 1
+	    self.world_time += time_elapsed
+
+	self.total_frames += 1
+	self.total_time += time_elapsed

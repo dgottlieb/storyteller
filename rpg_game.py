@@ -9,7 +9,7 @@ import menu
 import sounds
 import tiled_screen
 
-if __name__ == '__main__':
+def main():
     pygame.init()
     pygame.mouse.set_visible(0)
 
@@ -28,6 +28,8 @@ if __name__ == '__main__':
 
     pending_inputs = []
     keys_down = set([])
+    time_elapsed = 0
+
     while game_on:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -75,7 +77,7 @@ if __name__ == '__main__':
 
 	    if screen.game_state == tiled_screen.FIGHT and \
 		    event.type == pygame.KEYDOWN:
-		action = screen.zone.combat_manager.input(event, screen.total_frames)
+		action = screen.zone.combat_manager.input(event, screen.total_time)
                 if action == 'fight_over':
                     screen.game_state = tiled_screen.WORLD
                     screen.zone.music()
@@ -99,15 +101,14 @@ if __name__ == '__main__':
                 if key == 120:
                     #X
                     screen.close_menu()
-                    screen.draw_world()
                 elif key in (273, 274, 275, 276):
-                    screen.menu[-1].move_selection(key, screen.total_frames)
+                    screen.menu[-1].move_selection(key, screen.total_time)
                 elif key == 122:
                     #Z
                     action = screen.menu[-1].selected()
                     if not action:
-                        screen.draw()
-                        clock.tick(tiled_screen.FPS)
+                        screen.draw(time_elapsed)
+                        time_elapsed = clock.tick(tiled_screen.FPS)
                         continue
 
                     if action == 'close':
@@ -129,14 +130,16 @@ if __name__ == '__main__':
                     else:
                         screen.open_menu(action)
 
-
-        screen.draw()
-        clock.tick(tiled_screen.FPS)
+        screen.draw(time_elapsed)
+        time_elapsed = clock.tick_busy_loop(tiled_screen.FPS)
 
     end = time.time()
     print 'Quitting...'
     print 'Total Time = %.2f' % (end-start)
     print 'Total Frames = %d' % (screen.total_frames)
-    print 'Average FPS = %.2f' % (screen.total_frames / (end-start))
-
+    print 'Average FPS = %.2f' % (screen.total_frames / (end - start))
+    print 'Average FPS = %.2f' % (clock.get_fps(),)
     pygame.quit()
+
+if __name__ == '__main__':
+    main()

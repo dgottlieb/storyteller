@@ -26,11 +26,11 @@ right_arrow_img = pygame.image.load('images/right-arrow.gif')
 down_arrow_img = pygame.image.load('images/down-arrow.gif')
 
 class BaseMenu(object):
-    def __init__(self, start_frame_num, pos, menu_items):
+    def __init__(self, start_time, pos, menu_items):
         self.arrow_img = right_arrow_img.convert()
         self.arrow_size = (40, 10)
 
-        self.start_frame_num = start_frame_num
+        self.start_time = start_time
 
         self.pos = pos
 
@@ -40,12 +40,12 @@ class BaseMenu(object):
         rows, cols = len(menu_items), len(menu_items[0])
         self.size = (27 + 122 * cols, 27 + 37 * rows)
 
-    def blit_menu(self, screen, frame_num):
+    def blit_menu(self, screen, time):
         screen.fill(black, (self.pos + self.size))
         screen.fill(white, self.white_box)
         screen.fill(black, self.inside_box)
 
-        blit_arrow = (frame_num - self.start_frame_num) % 100 < 60
+        blit_arrow = (time - self.start_time) % 2000 < 1000
 
         first_pos = (self.pos[0] + 40, self.pos[1] + 20)
         size = (200, 10)
@@ -77,7 +77,7 @@ class BaseMenu(object):
         new_size = (white_box[2] - 4, white_box[3] - 4)
         return new_pos + new_size
 
-    def move_selection(self, input_code, frame_num):
+    def move_selection(self, input_code, time):
         move_map = {273: (-1, 0), #UP
                     274: (1, 0), #DOWN
                     275: (0, 1), #RIGHT
@@ -90,14 +90,14 @@ class BaseMenu(object):
         self.selection[0] = (self.selection[0]) % len(self.menu_items)
         self.selection[1] = (self.selection[1]) % len(self.menu_items[0])
 
-        self.start_frame_num = frame_num
+        self.start_time = time
 
 class WorldMenu(BaseMenu):
-    def __init__(self, start_frame_num):
+    def __init__(self, start_time):
         menu_items = [(talk_option, spells_option), 
                       (status_option, items_option), 
                       (use_option, equip_option)]
-        BaseMenu.__init__(self, start_frame_num, (40, 30), menu_items)
+        BaseMenu.__init__(self, start_time, (40, 30), menu_items)
 
     def selected(self):
         selected_item = self.menu_items[self.selection[0]][self.selection[1]]
@@ -105,9 +105,9 @@ class WorldMenu(BaseMenu):
             return 'talk'
 
 class FightMenu(BaseMenu):
-    def __init__(self, start_frame_num):
+    def __init__(self, start_time):
         menu_items = [(fight_option,), (combat_spell_option,), (combat_items_option,)]
-        BaseMenu.__init__(self, start_frame_num, (40, 375), menu_items)
+        BaseMenu.__init__(self, start_time, (40, 375), menu_items)
 
     def selected(self):
         selected_item = self.menu_items[self.selection[0]][0]
@@ -127,7 +127,7 @@ class TalkMenu(object):
         self.pos = (100, 350)
         self.size = (650, 200)
 
-    def blit_menu(self, screen, frame):
+    def blit_menu(self, screen, time):
         screen.fill(black, (self.pos + self.size))
         screen.fill(white, self.white_box)
         screen.fill(black, self.inside_box)
@@ -137,7 +137,7 @@ class TalkMenu(object):
             screen.blit(text, self.speech_box(line_idx))
 
         if self.speech_idx + 1 < len(self.speech_parts):
-            self.blit_next_arrow(screen, frame)
+            self.blit_next_arrow(screen, time)
 
     @property
     def white_box(self):
@@ -166,12 +166,12 @@ class TalkMenu(object):
 
         return None
 
-    def move_selection(self, key, frame_num):
+    def move_selection(self, key, time):
         #talk menus have no actions, ignore arrow keys
         pass
 
-    def blit_next_arrow(self, screen, frame_num):
-        if frame_num % 100 < 40:
+    def blit_next_arrow(self, screen, time):
+        if time % 2000 < 1000:
             return
 
         inside_box = self.inside_box

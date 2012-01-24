@@ -68,7 +68,7 @@ class Zone(object):
 
 	    if fight:
 		screen.game_state = tiled_screen.FIGHT
-		self.combat_manager.generate_fight(screen, screen.total_frames)
+		self.combat_manager.generate_fight(screen, screen.total_time)
 		screen.stop_walking()
 		return None
 
