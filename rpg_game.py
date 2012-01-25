@@ -77,7 +77,7 @@ def main():
 
 	    if screen.game_state == tiled_screen.FIGHT and \
 		    event.type == pygame.KEYDOWN:
-		action = screen.zone.combat_manager.input(event, screen.total_time)
+		action = screen.zone.combat_manager.input(screen, event, screen.total_time)
                 if action == 'fight_over':
                     screen.game_state = tiled_screen.WORLD
                     screen.zone.music()

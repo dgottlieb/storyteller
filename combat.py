@@ -34,27 +34,35 @@ class CombatManager(object):
 
 	return False
 
-    def input(self, pygame_event, time):
+    def input(self, screen, pygame_event, time):
         if pygame_event.type != pygame.KEYDOWN:
             return
 
-        if self.current_fight.state != INPUT:
+        if self.current_fight.state != INPUT and self.current_fight.state != ENEMY_SELECT:
             return
 
         key = pygame_event.dict['key']
         if key in [273, 274]:
-            self.current_fight._fight_menu.move_selection(key, time)
+            self.current_fight._menus[-1].move_selection(key, time)
             return None
 
         if key == 122:
-            action = self.current_fight._fight_menu.selected()
-            if action == 'attack':
-                self.current_fight.attack(time)
+            action = self.current_fight._menus[-1].selected()
+            if action in ['attack', 'spell']:
+                self.current_fight.generate_enemy_select_menu(time, action)
+
+            if len(action) == 2:
+                action_type, position = action
+                if action_type == 'attack':
+                    self.current_fight.attack(time, position)
 
             return None
 
         if key == 120:
-            return 'fight_over'
+            canceled_menu = self.current_fight._menus.pop()
+            canceled_menu.hide(screen.screen)
+            if not self.current_fight._menus:
+                return 'fight_over'
 
         return None
 
@@ -73,6 +81,7 @@ SPELL = 3
 ENEMIES = 4
 ATTACK_RESULT = 5
 SPELL_RESULT = 6
+ENEMY_SELECT = 7
 
 HIT = 0
 CRIT = 1
@@ -93,7 +102,7 @@ class Fight(object):
         self.state_start = start_time
         self.state_duration = seconds_for_opener
 
-        self._fight_menu = menu.FightMenu(start_time)
+        self._menus = [menu.FightMenu(start_time)]
         self._sound_channel = sounds.get_channel()
 
         self.attacked_enemy_pos = -1
@@ -108,8 +117,8 @@ class Fight(object):
                     enemy = self._enemies[idx]
                     enemy.blit(screen.screen, idx, len(self._enemies))
 
-        elif self.state == INPUT:
-            self._fight_menu.blit_menu(screen.screen, time)
+        elif self.state == INPUT or self.state == ENEMY_SELECT:
+            self._menus[-1].blit_menu(screen.screen, time)
         elif self.state == ATTACK:
             self.draw_attack(screen, time)
         elif self.state == ATTACK_RESULT:
@@ -127,7 +136,9 @@ class Fight(object):
         screen.screen.fill(black, (box_start_point + box_size))
 
     def draw_attack(self, screen, time):
-        self._fight_menu.hide(screen.screen)
+        for menu in self._menus:
+            menu.hide(screen.screen)
+
         if self._sound_channel.get_busy():
             return
 
@@ -146,18 +157,19 @@ class Fight(object):
 
             return
 
+        attack_menu = self._menus.pop()
         if True:
-            #last attacker
+            #last attacker - enemies fight back
             self.state = ENEMIES
             for idx in range(len(self._enemies)):
                 enemy = self._enemies[idx]
                 enemy.blit(screen.screen, idx, len(self._enemies))
 
-    def attack(self, time):
+    def attack(self, time, enemy_pos):
         self.state = ATTACK
         self.state_start = time
 
-        self.attacked_enemy_pos = random.choice(range(len(self._enemies)))
+        self.attacked_enemy_pos = enemy_pos
 
         self._sound_channel.queue(sounds.attack_sound)
 
@@ -178,3 +190,16 @@ class Fight(object):
             self._attack_result = MISS
             self.state_duration = 0.4
             self._sound_channel.queue(sounds.dodge_sound)
+
+    def generate_enemy_select_menu(self, time, action_type):
+        self._menus.append(EnemySelectionMenu(time, self._enemies, action_type))
+
+class EnemySelectionMenu(menu.BaseMenu):
+    def __init__(self, start_time, enemies, action_type):
+        menu_items = [(enemy.menu_option(),) for enemy in enemies]
+        menu.BaseMenu.__init__(self, start_time, (100, 350), menu_items)
+        self.action_type = action_type
+
+    def selected(self):
+        position = self.selection[0]
+        return self.action_type, position

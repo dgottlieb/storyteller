@@ -1,5 +1,7 @@
 import pygame
 
+import menu
+
 black = (0, 0, 0)
 white = (255, 255, 255)
 
@@ -9,9 +11,10 @@ enemy_height = 125
 enemy_width_buffer = 25
 
 class Enemy(object):
-    def __init__(self, image_file):
+    def __init__(self, name, image_file):
         raw_surface = pygame.image.load(image_file)
         self.surface = pygame.transform.scale(raw_surface, (enemy_width, enemy_height))
+        self.name = name
 
     def blit(self, screen, position, num_enemies):
         enemy_rectangle = self.enemy_rectangle(screen, position, num_enemies)
@@ -49,6 +52,9 @@ class Enemy(object):
         width = screen.get_width() - (2 * start_x)
         return (100, 150, width, 200)
 
+    def menu_option(self):
+        return menu.writer.render(self.name, menu.antialias, white, black)
+
 class Karon(Enemy):
     def __init__(self):
-        Enemy.__init__(self, './images/monsters/karonr.gif')
+        Enemy.__init__(self, 'Karon', './images/monsters/karonr.gif')
