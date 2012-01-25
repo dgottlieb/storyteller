@@ -4,6 +4,7 @@ import pygame
 
 import chars
 import menu
+import pc
 import sounds
 
 black = (0, 0, 0)
@@ -73,6 +74,8 @@ class Screen(object):
 
         self.menu = []
         self.game_state = WORLD
+
+        self.party = pc.Party(pc.PC('Dan'))
 
     @property
     def size(self):
@@ -240,7 +243,7 @@ class Screen(object):
         self.hero_pos[1] += self.moving_cols
 
         #take actions for the new spot
-        self.zone.take_actions(self)
+        self.zone.take_actions(self, self.party)
 
         #and update the slice of the map
         self.update_grid()            

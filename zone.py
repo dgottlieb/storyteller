@@ -59,7 +59,7 @@ class Zone(object):
     def get_position(self, search_tile):
         return self.locations[search_tile[0]][search_tile[1]]
 
-    def take_actions(self, screen):
+    def take_actions(self, screen, party):
         tile = self.map[screen.hero_pos[0]][screen.hero_pos[1]]
 	if self.combat_manager:
 	    fight = self.combat_manager.step(tile)
@@ -68,7 +68,7 @@ class Zone(object):
 
 	    if fight:
 		screen.game_state = tiled_screen.FIGHT
-		self.combat_manager.generate_fight(screen, screen.total_time)
+		self.combat_manager.generate_fight(screen, screen.total_time, party)
 		screen.stop_walking()
 		return None
 

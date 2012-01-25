@@ -11,10 +11,22 @@ enemy_height = 125
 enemy_width_buffer = 25
 
 class Enemy(object):
-    def __init__(self, name, image_file):
+    def __init__(self, name, image_file, attack, defense, hit_points):
         raw_surface = pygame.image.load(image_file)
         self.surface = pygame.transform.scale(raw_surface, (enemy_width, enemy_height))
         self.name = name
+
+        self.attack = attack
+        self.defense = defense
+        self.hit_points = hit_points
+
+    def blit_if_alive(self, screen, position, num_enemies):
+        if not self.alive:
+            self.hide(screen, position, num_enemies)
+            return
+
+        enemy_rectangle = self.enemy_rectangle(screen, position, num_enemies)
+        screen.blit(self.surface, enemy_rectangle)
 
     def blit(self, screen, position, num_enemies):
         enemy_rectangle = self.enemy_rectangle(screen, position, num_enemies)
@@ -55,6 +67,14 @@ class Enemy(object):
     def menu_option(self):
         return menu.writer.render(self.name, menu.antialias, white, black)
 
+    def attacked(self, damage):
+        self.hit_points -= damage
+
+    @property
+    def alive(self):
+        return self.hit_points > 0
+
 class Karon(Enemy):
     def __init__(self):
-        Enemy.__init__(self, 'Karon', './images/monsters/karonr.gif')
+        Enemy.__init__(self, 'Karon', './images/monsters/karonr.gif', 
+                       attack=10, defense=10, hit_points=30)

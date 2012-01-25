@@ -66,9 +66,9 @@ class CombatManager(object):
 
         return None
 
-    def generate_fight(self, screen, time):
+    def generate_fight(self, screen, time, party):
 	sounds.play_random_battle_song()
-        self.current_fight = Fight(screen, time)
+        self.current_fight = Fight(screen, time, party)
 
     def draw_combat(self, screen, time):
         self.current_fight.draw(screen, time)
@@ -88,14 +88,14 @@ CRIT = 1
 MISS = 2
 
 class Fight(object):
-    def __init__(self, screen, start_time):
+    def __init__(self, screen, start_time, party):
         self._start_time = start_time
         self._center = (screen.width / 2, screen.height / 2)
 
         if random.random() > 0.5:
             self._enemies = [enemies.Karon()]
         else:
-            self._enemies = [enemies.Karon()] * 2
+            self._enemies = [enemies.Karon(), enemies.Karon()]
 
         seconds_for_opener = 0.5
         self.state = OPENER
@@ -106,6 +106,8 @@ class Fight(object):
         self._sound_channel = sounds.get_channel()
 
         self.attacked_enemy_pos = -1
+        self.party = party
+        self.active_pc_idx = 0
 
     def draw(self, screen, time):
         state_perc = (1.0 * time - self.state_start) / self.state_duration / 1000
@@ -151,23 +153,29 @@ class Fight(object):
 
             to_blit = (time - self.state_start) % 200 < 100
             if to_blit:
-                self._enemies[0].blit(screen.screen, self.attacked_enemy_pos, len(self._enemies))
+                self.attacked_enemy.blit(screen.screen, self.attacked_enemy_pos, len(self._enemies))
             else:
-                self._enemies[0].hide(screen.screen, self.attacked_enemy_pos, len(self._enemies))
+                self.attacked_enemy.hide(screen.screen, self.attacked_enemy_pos, len(self._enemies))
 
             return
 
         attack_menu = self._menus.pop()
-        if True:
+        self.active_pc_idx += 1
+        if self.active_pc_idx == len(self.party.members):
             #last attacker - enemies fight back
+            self.active_pc_idx = 0
             self.state = ENEMIES
             for idx in range(len(self._enemies)):
                 enemy = self._enemies[idx]
-                enemy.blit(screen.screen, idx, len(self._enemies))
+                enemy.blit_if_alive(screen.screen, idx, len(self._enemies))
 
     def attack(self, time, enemy_pos):
         self.state = ATTACK
         self.state_start = time
+
+        for enemy in self._enemies[:enemy_pos+1]:
+            if enemy.alive == False:
+                enemy_pos += 1
 
         self.attacked_enemy_pos = enemy_pos
 
@@ -177,16 +185,19 @@ class Fight(object):
         self.state = ATTACK_RESULT
         self.state_start = time
 
-        rand = random.random()
-        if rand > 0.5:
+        self.attacked_enemy = self._enemies[self.attacked_enemy_pos]
+        attacker = self.party.members[self.active_pc_idx]
+        result = attacker.melee(self.attacked_enemy)
+
+        if result == 'hit':
             self._attack_result = HIT
             self.state_duration = 0.5
             self._sound_channel.queue(sounds.hit_sound)
-        elif rand > 0.25:
+        elif result == 'crit':
             self._attack_result = CRIT
             self.state_duration = 0.5
             self._sound_channel.queue(sounds.critical_sound)
-        else:
+        elif result == 'miss':
             self._attack_result = MISS
             self.state_duration = 0.4
             self._sound_channel.queue(sounds.dodge_sound)
@@ -194,9 +205,17 @@ class Fight(object):
     def generate_enemy_select_menu(self, time, action_type):
         self._menus.append(EnemySelectionMenu(time, self._enemies, action_type))
 
+    @property
+    def is_over(self):
+        #or if the party is all dead
+        if self.state != INPUT:
+            return False
+
+        return all(map(lambda x: x.alive == False, self._enemies))
+
 class EnemySelectionMenu(menu.BaseMenu):
     def __init__(self, start_time, enemies, action_type):
-        menu_items = [(enemy.menu_option(),) for enemy in enemies]
+        menu_items = [(enemy.menu_option(),) for enemy in enemies if enemy.alive]
         menu.BaseMenu.__init__(self, start_time, (100, 350), menu_items)
         self.action_type = action_type
 

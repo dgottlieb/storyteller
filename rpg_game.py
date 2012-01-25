@@ -79,6 +79,7 @@ def main():
 		    event.type == pygame.KEYDOWN:
 		action = screen.zone.combat_manager.input(screen, event, screen.total_time)
                 if action == 'fight_over':
+                    screen.zone.combat_manager.current_fight = None
                     screen.game_state = tiled_screen.WORLD
                     screen.zone.music()
 
@@ -129,6 +130,12 @@ def main():
                         screen.open_menu(talk_menu)
                     else:
                         screen.open_menu(action)
+
+        if screen.game_state == tiled_screen.FIGHT and \
+                screen.zone.combat_manager.current_fight.is_over:
+            screen.zone.combat_manager.current_fight = None
+            screen.game_state = tiled_screen.WORLD
+            screen.zone.music()
 
         screen.draw(time_elapsed)
         time_elapsed = clock.tick(tiled_screen.MAX_FPS)
