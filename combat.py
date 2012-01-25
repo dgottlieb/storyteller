@@ -48,7 +48,9 @@ class CombatManager(object):
 
         if key == 122:
             action = self.current_fight._fight_menu.selected()
-            self.current_fight.attack(time)
+            if action == 'attack':
+                self.current_fight.attack(time)
+
             return None
 
         if key == 120:

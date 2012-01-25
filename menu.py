@@ -114,6 +114,14 @@ class FightMenu(BaseMenu):
         if selected_item == fight_option:
             return 'attack'
 
+        if selected_item == combat_spell_option:
+            return 'spell'
+
+        if selected_item == combat_items_option:
+            return 'item'
+
+        return None
+
 class TalkMenu(object):
     @staticmethod
     def render_speach(text_lines):
