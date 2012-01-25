@@ -38,6 +38,9 @@ class CombatManager(object):
         if pygame_event.type != pygame.KEYDOWN:
             return
 
+        if self.current_fight.state != INPUT:
+            return
+
         key = pygame_event.dict['key']
         if key in [273, 274]:
             self.current_fight._fight_menu.move_selection(key, time)
