@@ -9,7 +9,7 @@ import sounds
 black = (0, 0, 0)
 black_tile = pygame.Surface((64, 64))
 white = (255, 255, 255)
-FPS = 50
+MAX_FPS = 100
 
 TPS = 2 #Twitches per second, characters transitioning between different states
 MPS = 3 #Movement per second, how many tiles the hero can walk per second

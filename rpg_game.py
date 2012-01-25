@@ -131,7 +131,7 @@ def main():
                         screen.open_menu(action)
 
         screen.draw(time_elapsed)
-        time_elapsed = clock.tick_busy_loop(tiled_screen.FPS)
+        time_elapsed = clock.tick(tiled_screen.MAX_FPS)
 
     end = time.time()
     print 'Quitting...'

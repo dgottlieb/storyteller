@@ -78,7 +78,10 @@ class Fight(object):
         self._start_time = start_time
         self._center = (screen.width / 2, screen.height / 2)
 
-        self._enemies = [enemies.Karon()]
+        if random.random() > 0.5:
+            self._enemies = [enemies.Karon()]
+        else:
+            self._enemies = [enemies.Karon()] * 2
 
         seconds_for_opener = 0.5
         self.state = OPENER
@@ -88,14 +91,17 @@ class Fight(object):
         self._fight_menu = menu.FightMenu(start_time)
         self._sound_channel = sounds.get_channel()
 
+        self.attacked_enemy_pos = -1
+
     def draw(self, screen, time):
         state_perc = (1.0 * time - self.state_start) / self.state_duration / 1000
         if self.state == OPENER:
             self.draw_opener(screen, state_perc)
             if state_perc > 1:
                 self.state = INPUT
-                for enemy in self._enemies:
-                    enemy.blit(screen.screen)
+                for idx in range(len(self._enemies)):
+                    enemy = self._enemies[idx]
+                    enemy.blit(screen.screen, idx, len(self._enemies))
 
         elif self.state == INPUT:
             self._fight_menu.blit_menu(screen.screen, time)
@@ -129,21 +135,24 @@ class Fight(object):
 
             to_blit = (time - self.state_start) % 200 < 100
             if to_blit:
-                self._enemies[0].blit(screen.screen)
+                self._enemies[0].blit(screen.screen, self.attacked_enemy_pos, len(self._enemies))
             else:
-                self._enemies[0].hide(screen.screen)
+                self._enemies[0].hide(screen.screen, self.attacked_enemy_pos, len(self._enemies))
 
             return
 
         if True:
             #last attacker
             self.state = ENEMIES
-            for enemy in self._enemies:
-                enemy.blit(screen.screen)
+            for idx in range(len(self._enemies)):
+                enemy = self._enemies[idx]
+                enemy.blit(screen.screen, idx, len(self._enemies))
 
     def attack(self, time):
         self.state = ATTACK
         self.state_start = time
+
+        self.attacked_enemy_pos = random.choice(range(len(self._enemies)))
 
         self._sound_channel.queue(sounds.attack_sound)
 
@@ -154,13 +163,13 @@ class Fight(object):
         rand = random.random()
         if rand > 0.5:
             self._attack_result = HIT
-            self.state_duration = 0.5 * tiled_screen.FPS
+            self.state_duration = 0.5
             self._sound_channel.queue(sounds.hit_sound)
         elif rand > 0.25:
             self._attack_result = CRIT
-            self.state_duration = 0.5 * tiled_screen.FPS
+            self.state_duration = 0.5
             self._sound_channel.queue(sounds.critical_sound)
         else:
             self._attack_result = MISS
-            self.state_duration = 0.4 * tiled_screen.FPS
+            self.state_duration = 0.4
             self._sound_channel.queue(sounds.dodge_sound)
