@@ -23,7 +23,6 @@ class Enemy(object):
 
     def enemy_rectangle(self, screen, position, num_enemies):
         fight_rectangle = self.fight_rectangle(screen)
-        #screen.fill(white, fight_rectangle)
 
         group_rectangle_relative = self.group_rectangle(num_enemies)
         group_rectangle_absolute = ((fight_rectangle[2] - group_rectangle_relative[0]) / 2 + 
@@ -32,19 +31,9 @@ class Enemy(object):
                                     fight_rectangle[1],
                                     group_rectangle_relative[0], group_rectangle_relative[1])
 
-        #screen.fill(black, group_rectangle_absolute)
-
         enemy_rectangle = (group_rectangle_absolute[0] + self.enemy_offset_from_left(position),
                            group_rectangle_absolute[1],
                            enemy_width, enemy_height)
-
-        """
-        print 'call'
-        print num_enemies
-        print fight_rectangle
-        print group_rectangle_absolute
-        print enemy_rectangle
-        """
 
         return enemy_rectangle
 
