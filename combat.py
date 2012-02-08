@@ -39,10 +39,13 @@ class CombatManager(object):
         if pygame_event.type != pygame.KEYDOWN:
             return
 
-        if self.current_fight.state != INPUT and self.current_fight.state != ENEMY_SELECT:
+        if self.current_fight.state not in [INPUT, ENEMY_SELECT, WIN]:
             return
 
         key = pygame_event.dict['key']
+        if self.current_fight.state == WIN and key == 122:
+            return 'fight_over'
+
         if key in [273, 274]:
             self.current_fight._menus[-1].move_selection(key, time)
             return None
@@ -83,6 +86,7 @@ ENEMIES = 4
 ATTACK_RESULT = 5
 SPELL_RESULT = 6
 ENEMY_SELECT = 7
+WIN = 8
 
 HIT = 0
 CRIT = 1
@@ -133,6 +137,8 @@ class Fight(object):
             self._combat_log.hide(screen.screen)
             self._combat_log.clear()
             self.state = INPUT
+        elif self.state == WIN:
+            pass
 
     def draw_opener(self, screen, opener_perc):
         box_size = (screen.width * opener_perc, screen.height * opener_perc)
@@ -147,11 +153,11 @@ class Fight(object):
 
         self._combat_log.blit(screen.screen)
 
-        if state_perc < 0.2:
+        if state_perc < 0.4:
             return
 
         if not self._combat_log.lines:
-            self._combat_log.append_line(self._attack_log_line)
+            self._combat_log.append(self._attack_log_line)
             self._attack_log_line = None
             self._sound_channel.queue(sounds.attack_sound)
 
@@ -189,6 +195,19 @@ class Fight(object):
                 enemy = self._enemies[idx]
                 enemy.blit_if_alive(screen.screen, idx, len(self._enemies))
 
+        if self.is_over:
+            self.state = WIN
+            while self._menus:
+                popped_menu = self._menus.pop()
+                popped_menu.hide(screen.screen)
+
+            self._combat_log.clear()
+            self._combat_log.append("You have vanquished the enemies!")
+            self._combat_log.append("You received 0 Gold and 0 Experience, loser.")
+            self._combat_log.append("(But you walk away with your life.)")
+            self._combat_log.blit(screen.screen)
+
+            
     def attack(self, time, enemy_pos):
         self.state = ATTACK
         self.state_start = time
@@ -207,7 +226,7 @@ class Fight(object):
         self.attacked_enemy = self._enemies[self.attacked_enemy_pos]
         attacker = self.party.members[self.active_pc_idx]
         result = attacker.melee(self.attacked_enemy)
-        self._combat_log.append_line(result["feedback"])
+        self._combat_log.append(result["feedback"])
 
         if result["action"] == 'hit':
             self._attack_result = HIT
@@ -227,10 +246,6 @@ class Fight(object):
 
     @property
     def is_over(self):
-        #or if the party is all dead
-        if self.state != INPUT:
-            return False
-
         return all(map(lambda x: x.alive == False, self._enemies))
 
 class EnemySelectionMenu(menu.BaseMenu):

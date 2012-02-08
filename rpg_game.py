@@ -131,12 +131,6 @@ def main():
                     else:
                         screen.open_menu(action)
 
-        if screen.game_state == tiled_screen.FIGHT and \
-                screen.zone.combat_manager.current_fight.is_over:
-            screen.zone.combat_manager.current_fight = None
-            screen.game_state = tiled_screen.WORLD
-            screen.zone.music()
-
         screen.draw(time_elapsed)
         time_elapsed = clock.tick(tiled_screen.MAX_FPS)
 

@@ -40,7 +40,7 @@ class CombatLog():
                 self.rectangle[2] - 2 * self.border_width,
                 self.rectangle[3] - 2 * self.border_width]
 
-    def append_line(self, text):
+    def append(self, text):
         output = writer.render(text, antialias, white, black)
         self.lines.append(output)
 
