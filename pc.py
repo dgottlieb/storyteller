@@ -5,6 +5,15 @@ class Party(object):
         self.members = [hero]
         self.items = []
 
+    def __len__(self):
+        return len(self.members)
+
+    def __iter__(self):
+        return iter(self.members)
+
+    def __getitem__(self, idx):
+        return self.members[idx]
+
 class PC(object):
     def __init__(self, name):
         self.name = name
@@ -35,6 +44,14 @@ class PC(object):
     def __str__(self):
         return self.name
 
+    def __getitem__(self, item_key):
+        if item_key.lower() == 'hp':
+            return self.hp
+        elif item_key.lower() == 'mp':
+            return self.mp
+
+        return 'pc[%s] is not known' % (item_key,)
+
     @property
     def attack(self):
         return 14
@@ -44,15 +61,15 @@ class PC(object):
         chance_to_crit = 0.1
 
         if random.random() > chance_to_hit:
-            return {"action": "miss", "feedback": "You miss", "damage": 0}
+            return {"action": "miss", "feedback": "You miss!", "damage": 0}
 
         if random.random() < chance_to_crit:
             damage = self.attack * 3
             enemy.attacked(damage)
             return {"action": "crit", "damage": damage,
-                    "feedback": "You critically strike %s for %d" % (enemy.name, damage)}
+                    "feedback": "You critically strike %s for %d!" % (enemy.name, damage)}
 
         damage = self.attack * self.attack / enemy.defense
         enemy.attacked(damage)
         return {"action": "hit", "damage": damage,
-                "feedback": "You hit %s for %d" % (enemy.name, damage)}
+                "feedback": "You hit %s for %d!" % (enemy.name, damage)}
