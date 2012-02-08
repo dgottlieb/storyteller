@@ -1,6 +1,7 @@
 import pygame
 
 import enemies
+import inform
 import menu
 import random
 import sounds
@@ -103,6 +104,7 @@ class Fight(object):
         self.state_duration = seconds_for_opener
 
         self._menus = [menu.FightMenu(start_time)]
+        self._combat_log = inform.CombatLog()
         self._sound_channel = sounds.get_channel()
 
         self.attacked_enemy_pos = -1
@@ -122,12 +124,14 @@ class Fight(object):
         elif self.state == INPUT or self.state == ENEMY_SELECT:
             self._menus[-1].blit_menu(screen.screen, time)
         elif self.state == ATTACK:
-            self.draw_attack(screen, time)
+            self.draw_attack(screen, state_perc, time)
         elif self.state == ATTACK_RESULT:
-            self.draw_attack_result(screen, time)
+            self.draw_attack_result(screen, state_perc, time)
         elif self.state == SPELL:
-            pass
+            self._combat_log.blit(screen.screen)
         elif self.state == ENEMIES:
+            self._combat_log.hide(screen.screen)
+            self._combat_log.clear()
             self.state = INPUT
 
     def draw_opener(self, screen, opener_perc):
@@ -137,16 +141,29 @@ class Fight(object):
 
         screen.screen.fill(black, (box_start_point + box_size))
 
-    def draw_attack(self, screen, time):
+    def draw_attack(self, screen, state_perc, time):
         for menu in self._menus:
             menu.hide(screen.screen)
+
+        self._combat_log.blit(screen.screen)
+
+        if state_perc < 0.2:
+            return
+
+        if not self._combat_log.lines:
+            self._combat_log.append_line(self._attack_log_line)
+            self._attack_log_line = None
+            self._sound_channel.queue(sounds.attack_sound)
 
         if self._sound_channel.get_busy():
             return
 
-        self.attack_result(time)
+        if state_perc >= 1.0:
+            self.attack_result(time)
 
-    def draw_attack_result(self, screen, time):
+    def draw_attack_result(self, screen, state_perc, time):
+        self._combat_log.blit(screen.screen)
+
         if self._sound_channel.get_busy():
             if self._attack_result == MISS:
                 return
@@ -157,6 +174,9 @@ class Fight(object):
             else:
                 self.attacked_enemy.hide(screen.screen, self.attacked_enemy_pos, len(self._enemies))
 
+            return
+
+        if state_perc < 1.0:
             return
 
         attack_menu = self._menus.pop()
@@ -178,8 +198,7 @@ class Fight(object):
                 enemy_pos += 1
 
         self.attacked_enemy_pos = enemy_pos
-
-        self._sound_channel.queue(sounds.attack_sound)
+        self._attack_log_line = "You attack %s" % (self._enemies[enemy_pos].name,)
 
     def attack_result(self, time):
         self.state = ATTACK_RESULT
@@ -188,18 +207,19 @@ class Fight(object):
         self.attacked_enemy = self._enemies[self.attacked_enemy_pos]
         attacker = self.party.members[self.active_pc_idx]
         result = attacker.melee(self.attacked_enemy)
+        self._combat_log.append_line(result["feedback"])
 
-        if result == 'hit':
+        if result["action"] == 'hit':
             self._attack_result = HIT
-            self.state_duration = 0.5
+            self.state_duration = 1.0
             self._sound_channel.queue(sounds.hit_sound)
-        elif result == 'crit':
+        elif result["action"] == 'crit':
             self._attack_result = CRIT
-            self.state_duration = 0.5
+            self.state_duration = 1.0
             self._sound_channel.queue(sounds.critical_sound)
-        elif result == 'miss':
+        elif result["action"] == 'miss':
             self._attack_result = MISS
-            self.state_duration = 0.4
+            self.state_duration = 0.8
             self._sound_channel.queue(sounds.dodge_sound)
 
     def generate_enemy_select_menu(self, time, action_type):

@@ -109,7 +109,7 @@ def main():
                     action = screen.menu[-1].selected()
                     if not action:
                         screen.draw(time_elapsed)
-                        time_elapsed = clock.tick(tiled_screen.FPS)
+                        time_elapsed = clock.tick(tiled_screen.MAX_FPS)
                         continue
 
                     if action == 'close':

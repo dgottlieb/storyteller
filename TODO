@@ -1,10 +1,26 @@
 Ability to load maps from file
-  * Walls/Floor
-  * Easy water cornering
   * Doors
   * NPCs/Dialogue + Yes/No prompts
   * Equipment
   * Treasure
-  * Stairs/Exits and connections
 
 Fade effect when taking stairs or entering/leaving town
+Melee formulas
+Spells
+Items/Inventories/Gold
+Party member animations when traveling
+Status menus
+Equip menus
+Merchant menus
+
+Ideas/Mechanics
+---------------
+Sympathy (Name of the Wind)
+ - Energy sources (sacrifice HP) increase spell power
+ - Knowledge of opponent increases effectiveness
+Combat Challenges
+ - Prize items/level up faster for completing challenges
+Before battle formations
+ - Lots of small enemies should be fought by a centralized unit (watch each others back)
+ - Few big enemies should be fought while spread out.
+ - Spells can be more effective on more focused groups - group heal works better when clustered.

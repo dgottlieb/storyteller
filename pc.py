@@ -43,18 +43,16 @@ class PC(object):
         chance_to_hit = 0.9
         chance_to_crit = 0.1
 
-        enemy.attacked(16)
-        return 'hit'
-
         if random.random() > chance_to_hit:
-            return 'miss'
+            return {"action": "miss", "feedback": "You miss", "damage": 0}
 
         if random.random() < chance_to_crit:
-            enemy.attacked(self.attack * 3)
-            print 'Critted for %d, %d HP remains' % (self.attack * 3, enemy.hit_points)
-            return 'crit'
+            damage = self.attack * 3
+            enemy.attacked(damage)
+            return {"action": "crit", "damage": damage,
+                    "feedback": "You critically strike %s for %d" % (enemy.name, damage)}
 
-        dmg = self.attack * self.attack / enemy.defense
-        enemy.attacked(dmg)
-        print 'Hit for %d, %d HP remains' % (dmg, enemy.hit_points)
-        return 'hit'
+        damage = self.attack * self.attack / enemy.defense
+        enemy.attacked(damage)
+        return {"action": "hit", "damage": damage,
+                "feedback": "You hit %s for %d" % (enemy.name, damage)}
