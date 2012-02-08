@@ -48,8 +48,12 @@ class CombatLog():
         self.lines = []
 
 class PartyStatus():
-    def __init__(self, party):
-        self.position = (100, 50)
+    def __init__(self, party, right=False):
+        if right:
+            self.position = (500, 30)
+        else:
+            self.position = (100, 50)
+
         self.border_width = 2
 
         self.party = party
@@ -94,7 +98,7 @@ class PartyStatus():
 
     def name_box(self, idx):
         x_offset = idx * 75
-        return [self.position[0] + 60 + x_offset,
+        return [self.position[0] + 55 + x_offset,
                 self.position[1] - (font_height / 2) + 3,
                 75, font_height]
 

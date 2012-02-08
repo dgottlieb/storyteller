@@ -3,6 +3,7 @@ import time
 import pygame
 
 import chars
+import inform
 import menu
 import pc
 import sounds
@@ -76,6 +77,7 @@ class Screen(object):
         self.game_state = WORLD
 
         self.party = pc.Party(pc.PC('Dan'))
+        self.status_box = inform.PartyStatus(self.party, right=True)
 
     @property
     def size(self):
@@ -292,6 +294,7 @@ class Screen(object):
 
     def draw(self, time_elapsed):
         if self.game_state == MENU:
+            self.status_box.blit(self.screen)
             self.menu[-1].blit_menu(self.screen, self.total_time) #blit_menu(screen, frames)
 	elif self.game_state == FIGHT:
 	    self.zone.combat_manager.draw_combat(self, self.total_time) #draw_combat(self, frames)
