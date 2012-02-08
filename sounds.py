@@ -23,10 +23,16 @@ dodge_sound.set_volume(0.8)
 critical_sound = pygame.mixer.Sound('./sounds/criticalhit.wav')
 critical_sound.set_volume(0.8)
 
-def play_music(song_file):
+win_battle_sound = pygame.mixer.Sound('./sounds/winbattle.wav')
+win_battle_sound.set_volume(0.8)
+
+def play_music(song_file, loops=-1):
     pygame.mixer.music.stop()
     pygame.mixer.music.load(song_file)
-    pygame.mixer.music.play(-1)
+    pygame.mixer.music.play(loops)
+
+def stop_music():
+    pygame.mixer.music.stop()
 
 beep_sound = pygame.mixer.Sound('./sounds/beep.wav')
 beep_sound.set_volume(0.8)

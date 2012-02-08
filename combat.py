@@ -43,7 +43,7 @@ class CombatManager(object):
             return
 
         key = pygame_event.dict['key']
-        if self.current_fight.state == WIN and key == 122:
+        if self.current_fight.state == WIN and key in [120, 122]:
             return 'fight_over'
 
         if key in [273, 274]:
@@ -201,9 +201,12 @@ class Fight(object):
                 popped_menu = self._menus.pop()
                 popped_menu.hide(screen.screen)
 
+            sounds.stop_music()
+            sounds.win_battle_sound.play()
+
             self._combat_log.clear()
             self._combat_log.append("You have vanquished the enemies!")
-            self._combat_log.append("You received 0 Gold and 0 Experience, loser.")
+            self._combat_log.append("You received 0 gold and 0 exp, loser.")
             self._combat_log.append("(But you walk away with your life.)")
             self._combat_log.blit(screen.screen)
 
