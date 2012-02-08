@@ -100,7 +100,7 @@ class PartyStatus():
 
     @property
     def width(self):
-        return 100 + len(self.party) * 100
+        return 50 + len(self.party) * 75
 
     @property
     def inside_box(self):
