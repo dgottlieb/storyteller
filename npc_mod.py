@@ -1,4 +1,5 @@
 import chars
+import menu
 import tiled_screen
 
 move_vector_to_orientation = {(1, 0): chars.DOWN,
@@ -91,3 +92,19 @@ class NPC(object):
             self.row = self.row + self.direction[0]
             self.col = self.col + self.direction[1]
             self.direction = (0, 0)
+
+    def talk(self, screen):
+        talk_menu = menu.TalkMenu(self.dialogue)
+        screen.open_menu(talk_menu)
+
+class Merchant(NPC):
+    def __init__(self, sprites, row, column, walk_path, items_for_sale):
+        NPC.__init__(self, sprites, row, column, walk_path)
+        self.items_for_sale = items_for_sale
+
+    def set_greeting(self, greeting):
+        self.greeting = greeting
+
+    def talk(self, screen):
+        merchant_menu = menu.BuySellMenu(screen.total_time, self, screen.party)
+        screen.open_menu(merchant_menu)

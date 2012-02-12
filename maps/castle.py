@@ -5,9 +5,9 @@ castle = [
 "..W.S.B.B.T.T.T.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.S.W.",
 "..W.S.B.B.T.K0T.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.S.W.",
 "..W.S.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.S.W.",
+"..W.S.B.B.N0B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.S.W.",
+"..W.S.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.S.W.",
 "..W.S.B.B.M0B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.S.W.",
-"..W.S.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.S.W.",
-"..W.S.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.S.W.",
 "..E0E0B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.S.W.",
 "..E0E0B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.S.W.",
 "..E0E0B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.B.S.W.",
@@ -30,7 +30,8 @@ castle = [
 import pygame
 
 import chars
-import npc
+import items
+import npc_mod
 import tiles
 import tiled_screen
 import world
@@ -48,21 +49,29 @@ class Castle(zone.Zone):
             return {'tile': None,
                     'exit': (lambda: world.World(), ('C0', 0), tiled_screen.DOWN)}
 
-        if tile_str == 'M0':
+        if tile_str == 'N0':
             walk_path = {(row, column): ((1, 0), 2),
                          (row + 1, column): ((0, 1), 2),
                          (row + 1, column + 1): ((-1, 0), 2),
                          (row, column + 1): ((0, -1), 0)}
-            merchant = npc.NPC(chars.get_merchant(), row, column, walk_path)
+            knight = npc_mod.NPC(chars.get_knight(), row, column, walk_path)
             return {'tile': tiles.brick_tile,
-                    'npc': merchant}
+                    'npc': knight}
 
         if tile_str == 'K0':
             walk_path = {}
-            king = npc.NPC(chars.get_king(), row, column, walk_path)
+            king = npc_mod.NPC(chars.get_king(), row, column, walk_path)
             king.set_dialogue([["I am the King."], ["My life is awesome."]])
             return {'tile': tiles.brick_tile,
                     'npc': king}
+
+        if tile_str == 'M0':
+            walk_path = {}
+            merchant = npc_mod.Merchant(chars.get_merchant(), row, column, walk_path,
+                                        [items.stick])
+            merchant.set_greeting([["What would you like to do?"]])
+            return {'tile': tiles.brick_tile,
+                    'npc': merchant}
 
     def special_actions(self, tile):
         pass

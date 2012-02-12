@@ -18,3 +18,7 @@ def get_merchant():
 def get_king():
     king = [chars_sheet.get_item(10, x, 64, 64, transparent=True) for x in range(2)]
     return king
+
+def get_knight():
+    knight = [chars_sheet.get_item(0, x, 64, 64, transparent=True) for x in range(8)]
+    return knight

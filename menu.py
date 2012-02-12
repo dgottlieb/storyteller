@@ -1,5 +1,7 @@
 import pygame
 
+import items
+
 white = (255, 255, 255)
 black = (0, 0, 0)
 
@@ -16,6 +18,12 @@ items_option = writer.render('Items', antialias, white, black)
 use_option = writer.render('Use', antialias, white, black)
 equip_option = writer.render('Equip', antialias, white, black)
 
+buy_option = writer.render('Buy', antialias, white, black)
+sell_option = writer.render('Sell', antialias, white, black)
+
+yes_option = writer.render('Yes', antialias, white, black)
+no_option = writer.render('No', antialias, white, black)
+
 fight_option = writer.render('Fight', antialias, white, black)
 combat_spell_option = writer.render('Spell', antialias, white, black)
 combat_items_option = writer.render('Item', antialias, white, black)
@@ -24,7 +32,7 @@ right_arrow_img = pygame.image.load('images/right-arrow.gif')
 down_arrow_img = pygame.image.load('images/down-arrow.gif')
 
 class BaseMenu(object):
-    def __init__(self, start_time, pos, menu_items):
+    def __init__(self, start_time, pos, menu_items, col_width=122):
         self.arrow_img = right_arrow_img.convert()
         self.arrow_size = (40, 10)
 
@@ -35,8 +43,8 @@ class BaseMenu(object):
         self.selection = [0, 0]
         self.menu_items = menu_items
 
-        rows, cols = len(menu_items), len(menu_items[0])
-        self.size = (27 + 122 * cols, 27 + 37 * rows)
+        self.rows, self.cols = len(menu_items), len(menu_items[0])
+        self.size = (27 + col_width * self.cols, 27 + 37 * self.rows)
 
     def blit_menu(self, screen, time):
         screen.fill(black, (self.pos + self.size))
@@ -46,7 +54,6 @@ class BaseMenu(object):
         blit_arrow = (time - self.start_time) % 2000 < 1000
 
         first_pos = (self.pos[0] + 40, self.pos[1] + 20)
-        size = (200, 10)
         for row_idx in range(len(self.menu_items)):
             row = self.menu_items[row_idx]
             for col_idx in range(len(row)):
@@ -186,3 +193,52 @@ class TalkMenu(object):
         arrow_size = (40, 20)
 
         screen.blit(self.arrow_img, arrow_pos + arrow_size)
+
+
+#Have a Prompt Menu which just wraps two normal menus, one being a talk menu and the other being an actual input menu. Make sure close menu commands get routed into the prompt menu instead of just being popped by rpg_game.
+class BuySellMenu(BaseMenu):
+    def __init__(self, start_time, merchant, party):
+        BaseMenu.__init__(self, start_time, (500, 200), [[buy_option], [sell_option]],
+                          col_width=80)
+        self.merchant = merchant
+        self.party = party
+        self.talk_menu = TalkMenu(merchant.greeting)
+
+    def selected(self):
+        selected_item = self.menu_items[self.selection[0]][self.selection[1]]
+        if selected_item == buy_option:
+            ret = ItemSelectMenu(self.start_time, map(items.Item.get_buy_rendered_name,
+                                                      self.merchant.items_for_sale))
+        else:
+            ret = ItemSelectMenu(self.start_time, map(items.Item.get_rendered_name,
+                                                      self.party.items))
+
+        return ret
+
+    def blit_menu(self, screen, time):
+        self.talk_menu.blit_menu(screen, time)
+        BaseMenu.blit_menu(self, screen, time)
+        
+class ItemSelectMenu(BaseMenu):
+    def __init__(self, start_time, item_list):
+        BaseMenu.__init__(self, start_time, (100, 200), map(lambda x: [x], item_list),
+                          col_width=205)
+        self.item_list = item_list
+        self.info_display = None
+        self.talk_menu = TalkMenu([["These are my wares"]])
+
+    def selected(self):
+        selected_item = self.item_list[self.selection[1]]
+        return selected_item
+
+    def blit_menu(self, screen, time):
+        self.talk_menu.blit_menu(screen, time)
+        BaseMenu.blit_menu(self, screen, time)
+
+class ConfirmMenu(BaseMenu):
+    def __init__(self, start_time, item):
+        BaseMenu.__init__(self, start_time, (500, 200), [[yes_option], [no_option]])
+        self.item = item
+
+    def selected(self):
+        selected_item = self.menu_items[0][self.selection[1]]

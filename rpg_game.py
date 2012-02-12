@@ -6,6 +6,7 @@ import pygame
 
 import chars
 import menu
+import npc_mod
 import sounds
 import tiled_screen
 
@@ -120,14 +121,14 @@ def main():
                         row, col = screen.get_facing_square()
 
                         npc = screen.zone.get_npc_at(row, col)
-                        dialogue = npc and npc.dialogue
-
-                        if not dialogue:
+                        if not npc:
                             tile_info = screen.zone.get_tile_info(row, col)
                             dialogue = tile_info.get('dialogue', [['There is no one here.']])
 
-                        talk_menu = menu.TalkMenu(dialogue)
-                        screen.open_menu(talk_menu)
+                            talk_menu = menu.TalkMenu(dialogue)
+                            screen.open_menu(talk_menu)
+
+                        npc.talk(screen)
                     else:
                         screen.open_menu(action)
 

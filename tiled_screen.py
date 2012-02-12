@@ -282,6 +282,10 @@ class Screen(object):
         self.menu.pop()
         if not self.menu:
             self.game_state = WORLD
+        else:
+            self.draw_world()
+            for menu in self.menu:
+                menu.blit_menu(self.screen, self.total_time)
 
     def close_all_menus(self):
         while self.menu:
