@@ -43,7 +43,7 @@ class CombatManager(object):
             return
 
         key = pygame_event.dict['key']
-        if self.current_fight.state == WIN and key in [120, 122]:
+        if self.current_fight.state == WIN: #Level up logic needed here
             return 'fight_over'
 
         if key in [273, 274]:
@@ -51,14 +51,13 @@ class CombatManager(object):
             return None
 
         if key == 122:
-            action = self.current_fight._menus[-1].selected()
-            if action in ['attack', 'spell']:
-                self.current_fight.generate_enemy_select_menu(time, action)
-
-            if len(action) == 2:
-                action_type, position = action
-                if action_type == 'attack':
-                    self.current_fight.attack(time, position)
+            result = self.current_fight._menus[-1].selected()
+            if result["action"] == "enemy_select":
+                self.current_fight.generate_enemy_select_menu(time, result["for"])
+            elif result["action"] == "attack":
+                self.current_fight.attack(time, result["position"])
+            elif result["action"] == "spell":
+                self.current_fight.attack(time, result["position"])
 
             return None
 
@@ -212,10 +211,15 @@ class Fight(object):
             sounds.stop_music()
             sounds.win_battle_sound.play()
 
+            total_gold = sum(map(lambda x: x.gold, self._enemies))
+            total_exp = sum(map(lambda x: x.exp, self._enemies))
+
+            self.party.add_gold(total_gold)
+            self.party.add_exp(total_exp)
+
             self._combat_log.clear()
             self._combat_log.append("You have vanquished the enemies!")
-            self._combat_log.append("You received 0 gold and 0 exp, loser.")
-            self._combat_log.append("(But you walk away with your life.)")
+            self._combat_log.append("You received %d gold and %d exp." % (total_gold, total_exp))
             self._combat_log.blit(screen.screen)
 
             
@@ -267,4 +271,4 @@ class EnemySelectionMenu(menu.BaseMenu):
 
     def selected(self):
         position = self.selection[0]
-        return self.action_type, position
+        return {"action": self.action_type, "position": position}

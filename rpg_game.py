@@ -37,10 +37,10 @@ def main():
                 game_on = False
                 continue
 
-            if 'key' not in event.dict:
+            if "key" not in event.dict:
                 continue
 
-            key = event.dict['key']
+            key = event.dict["key"]
             if event.type == pygame.KEYDOWN and key == 27:
                 #Escape
                 game_on = False
@@ -79,7 +79,7 @@ def main():
 	    if screen.game_state == tiled_screen.FIGHT and \
 		    event.type == pygame.KEYDOWN:
 		action = screen.zone.combat_manager.input(screen, event, screen.total_time)
-                if action == 'fight_over':
+                if action == "fight_over":
                     screen.zone.combat_manager.current_fight = None
                     screen.game_state = tiled_screen.WORLD
                     screen.zone.music()
@@ -107,41 +107,43 @@ def main():
                     screen.menu[-1].move_selection(key, screen.total_time)
                 elif key == 122:
                     #Z
-                    action = screen.menu[-1].selected()
-                    if not action:
+                    response = screen.menu[-1].selected()
+                    if not response:
                         screen.draw(time_elapsed)
                         time_elapsed = clock.tick(tiled_screen.MAX_FPS)
                         continue
 
-                    if action == 'close':
-                        screen.close_menu()
-                    elif action == 'close_all':
+                    if response["action"] == "close":
+                        for num in range(response["num_to_close"]):
+                            screen.close_menu()
+                    elif response["action"] == "close_all":
                         screen.close_all_menus()
-                    elif action == 'talk':
+                    elif response["action"] == "talk":
                         row, col = screen.get_facing_square()
 
                         npc = screen.zone.get_npc_at(row, col)
                         if not npc:
                             tile_info = screen.zone.get_tile_info(row, col)
-                            dialogue = tile_info.get('dialogue', [['There is no one here.']])
+                            dialogue = tile_info.get("dialogue", [["There is no one here."]])
 
                             talk_menu = menu.TalkMenu(dialogue)
                             screen.open_menu(talk_menu)
+                            continue
 
                         npc.talk(screen)
-                    else:
-                        screen.open_menu(action)
+                    elif response["action"] == "menu":
+                        screen.open_menu(response["menu"])
 
         screen.draw(time_elapsed)
         time_elapsed = clock.tick(tiled_screen.MAX_FPS)
 
     end = time.time()
-    print 'Quitting...'
-    print 'Total Time = %.2f' % (end-start)
-    print 'Total Frames = %d' % (screen.total_frames)
-    print 'Average FPS = %.2f' % (screen.total_frames / (end - start))
-    print 'Average FPS = %.2f' % (clock.get_fps(),)
+    print "Quitting..."
+    print "Total Time = %.2f" % (end-start)
+    print "Total Frames = %d" % (screen.total_frames)
+    print "Average FPS = %.2f" % (screen.total_frames / (end - start))
+    print "Average FPS = %.2f" % (clock.get_fps(),)
     pygame.quit()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

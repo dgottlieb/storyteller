@@ -77,7 +77,6 @@ class Screen(object):
         self.game_state = WORLD
 
         self.party = pc.Party(pc.PC('Dan'))
-        self.status_box = inform.PartyStatus(self.party, right=True)
 
     @property
     def size(self):
@@ -273,6 +272,9 @@ class Screen(object):
     def open_menu(self, new_menu=None):
         self.game_state = MENU
         if not new_menu:
+            self.party.status_box.update_values()
+            self.party.gold_box.update_values()
+
             self.menu.append(menu.WorldMenu(self.total_time)) #WorldMenu(frames)
             self.menu[-1].blit_menu(self.screen, self.total_time) #blit_menu(screen, frames)
         else:
@@ -283,9 +285,13 @@ class Screen(object):
         if not self.menu:
             self.game_state = WORLD
         else:
+            self.party.status_box.update_values()
+            self.party.gold_box.update_values()
+
             self.draw_world()
             for menu in self.menu:
-                menu.blit_menu(self.screen, self.total_time)
+                menu.update_values()
+                menu.blit_menu(self.screen, self.total_time, force_show_arrow=True)
 
     def close_all_menus(self):
         while self.menu:
@@ -298,7 +304,9 @@ class Screen(object):
 
     def draw(self, time_elapsed):
         if self.game_state == MENU:
-            self.status_box.blit(self.screen)
+            self.party.status_box.blit(self.screen)
+            self.party.gold_box.blit(self.screen)
+
             self.menu[-1].blit_menu(self.screen, self.total_time) #blit_menu(screen, frames)
 	elif self.game_state == FIGHT:
 	    self.zone.combat_manager.draw_combat(self, self.total_time) #draw_combat(self, frames)

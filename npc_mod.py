@@ -20,8 +20,9 @@ class NPC(object):
         self.offset_col = 0
         self.perc_moved = 0.0
 
-        self.dialogue = [['This human is strangely quiet. Almost as if God',
-                          'had forgotten to tell it what to say.']]
+        self.dialogue = [['This human is strangely quiet. Almost as',
+                          'if God had forgotten to tell it what to',
+                          'say.']]
 
     def get_sprite(self, time, seconds_per_twitch):
 	sprite_idx = int(time / seconds_per_twitch / 1000)

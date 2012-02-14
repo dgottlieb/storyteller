@@ -11,14 +11,20 @@ enemy_height = 125
 enemy_width_buffer = 25
 
 class Enemy(object):
-    def __init__(self, name, image_file, attack, defense, hit_points):
+    def __init__(self, name, image_file, **kwargs):
+        """Using kwargs because there are tons of bits that can be added. Current list:
+        attack, defense, hit_points, gold, exp
+        """
         raw_surface = pygame.image.load(image_file)
         self.surface = pygame.transform.scale(raw_surface, (enemy_width, enemy_height))
         self.name = name
 
-        self.attack = attack
-        self.defense = defense
-        self.hit_points = hit_points
+        self.attack = kwargs.pop("attack", 0)
+        self.defense = kwargs.pop("defense", 0)
+        self.hit_points = kwargs.pop("hit_points", 1)
+
+        self.gold = kwargs.pop("gold", 0)
+        self.exp = kwargs.pop("exp", 0)
 
     def blit_if_alive(self, screen, position, num_enemies):
         if not self.alive:
@@ -77,4 +83,4 @@ class Enemy(object):
 class Karon(Enemy):
     def __init__(self):
         Enemy.__init__(self, 'Karon', './images/monsters/karonr.gif', 
-                       attack=10, defense=10, hit_points=30)
+                       attack=10, defense=10, hit_points=30, gold=21, exp=9)

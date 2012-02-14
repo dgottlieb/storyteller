@@ -1,9 +1,15 @@
 import random
 
+import inform
+
 class Party(object):
     def __init__(self, hero):
         self.members = [hero]
         self.items = []
+        self.gold = 50
+
+        self.status_box = inform.PartyStatus(self, right=True)
+        self.gold_box = inform.GoldStatus(self)
 
     def __len__(self):
         return len(self.members)
@@ -13,6 +19,25 @@ class Party(object):
 
     def __getitem__(self, idx):
         return self.members[idx]
+
+    def add_gold(self, num_gold):
+        self.gold += num_gold
+
+    def add_exp(self, num_exp):
+        for member in self.members:
+            member.add_exp(num_exp)
+
+    def bought(self, item):
+        self.gold -= item.buy_price
+        self.items.append(item)
+
+        self.gold_box.update_values()
+
+    def sold(self, item):
+        self.gold += item.sell_price
+        self.items.remove(item)
+
+        self.gold_box.update_values()
 
 class PC(object):
     def __init__(self, name):
@@ -33,13 +58,15 @@ class PC(object):
         self.hp = 25
         self.mp = 15
 
+        self.exp = 0
+
         self.str = 10
         self.agi = 10
         self.con = 10
         self.will = 10
         self.int = 10
 
-        self.spells = []    
+        self.spells = []
 
     def __str__(self):
         return self.name
@@ -51,6 +78,9 @@ class PC(object):
             return self.mp
 
         return 'pc[%s] is not known' % (item_key,)
+
+    def add_exp(self, num_exp):
+        self.exp += num_exp
 
     @property
     def attack(self):

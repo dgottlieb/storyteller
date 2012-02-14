@@ -15,15 +15,25 @@ class Item(object):
         self.buy_price = -1
         self.sell_price = -1
 
-    def get_buy_rendered_name(self):
+    def get_rendered_buy_name(self):
         if hasattr(self, "_rendered_buy"):
-            return self._rendered
+            return self._rendered_buy
 
         name_spaces = " " * (15 - len(self.item_name))
         price_spaces = " " * (5 - len(str(self.buy_price)))
         render_string = "%s%s%s%d" % (self.item_name, name_spaces, price_spaces, self.buy_price)
-        self._rendered = writer.render(render_string, antialias, white, black)
-        return self._rendered
+        self._rendered_buy = writer.render(render_string, antialias, white, black)
+        return self._rendered_buy
+
+    def get_rendered_sell_name(self):
+        if hasattr(self, "_rendered_sell"):
+            return self._rendered_sell
+
+        name_spaces = " " * (15 - len(self.item_name))
+        price_spaces = " " * (5 - len(str(self.sell_price)))
+        render_string = "%s%s%s%d" % (self.item_name, name_spaces, price_spaces, self.sell_price)
+        self._rendered_sell = writer.render(render_string, antialias, white, black)
+        return self._rendered_sell
 
     def get_rendered_name(self):
         if hasattr(self, "_rendered"):
