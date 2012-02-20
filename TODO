@@ -4,6 +4,8 @@ Ability to load maps from file
   * Equipment
   * Treasure
 
+Enemies fight back
+Enemies can be defined by tile/regions
 Fade effect when taking stairs or entering/leaving town
 Melee formulas
 Spells
