@@ -1,0 +1,36 @@
+* Ability to load maps from file
+** TODO Doors
+** TODO NPCs/Dialogue + Yes/No prompts
+** TODO Equipment
+** TODO Treasure
+
+* Major Components
+** Spells
+
+* Combat mode
+** TODO Enemies fight back
+** TODO Enemies can be defined by tile/regions
+** TODO Better meleeing formulas
+
+* Menus
+** TODO Status menus
+** TODO Equip menus
+** TODO Item menus
+** TODO Page through items for sell menu
+
+* Aesthetic Effects
+** TODO Fade effect when taking stairs or entering/leaving town
+** TODO Screen shakes when enemies deal damage to players
+** TODO Party member animations when traveling
+
+* Mechanics
+** Combat Challenges
+*** Prize items/level up faster for completing game challenges/achievements
+** Sympathy (Name of the Wind)
+*** Energy sources (sacrifice HP) increase spell power
+*** Knowledge of opponent increases effeciveness
+** Before battle formations
+*** Hints as to the next enemy before encountering them
+*** Lots of small enemies should be fought by a centralized unit (watch each others back)
+*** Few big enemies should be fought while spread out (tank draws attention)
+*** Spells can be more effective on focused groups - e.g. group heal works better when clustered.
