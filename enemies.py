@@ -2,6 +2,8 @@ import pygame
 
 import menu
 
+import random
+
 black = (0, 0, 0)
 white = (255, 255, 255)
 
@@ -22,6 +24,8 @@ class Enemy(object):
         self.attack = kwargs.pop("attack", 0)
         self.defense = kwargs.pop("defense", 0)
         self.hit_points = kwargs.pop("hit_points", 1)
+
+        self.initiative = kwargs.pop("initiative", 50)
 
         self.gold = kwargs.pop("gold", 0)
         self.exp = kwargs.pop("exp", 0)
@@ -75,6 +79,10 @@ class Enemy(object):
 
     def attacked(self, damage):
         self.hit_points -= damage
+
+    def get_wait_time(self, last_action):
+        last_action_delay = 0
+        return int(random.normalvariate(self.initiative, 0.1 * self.initiative)) + last_action_delay
 
     @property
     def alive(self):

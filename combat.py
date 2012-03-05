@@ -3,6 +3,7 @@ import pygame
 import enemies
 import inform
 import menu
+import pc
 import random
 import sounds
 import tiled_screen
@@ -81,11 +82,13 @@ OPENER = 0
 INPUT = 1
 ATTACK = 2
 SPELL = 3
-ENEMIES = 4
-ATTACK_RESULT = 5
-SPELL_RESULT = 6
-ENEMY_SELECT = 7
-WIN = 8
+ENEMY_ACTION = 4
+ENEMY_ATTACK = 5
+ATTACK_RESULT = 6
+SPELL_RESULT = 7
+ENEMY_SELECT = 8
+WIN = 9
+ENEMY_PAUSE = 10
 
 HIT = 0
 CRIT = 1
@@ -113,10 +116,9 @@ class Fight(object):
 
         self.attacked_enemy_pos = -1
         self.party = party
-        self.active_pc_idx = 0
+        self.action_order = map(lambda x: [x, 0], party.members + self.enemies)
 
-        self.round = 0
-        self.generate_round_order()
+        self.last_actioner = None #set at end of opener
 
     def draw(self, screen, time):
         state_perc = (1.0 * time - self.state_start) / self.state_duration / 1000
@@ -133,11 +135,19 @@ class Fight(object):
         elif self.state == SPELL:
             self._party_status.blit(screen.screen)
             self._combat_log.blit(screen.screen)
-        elif self.state == ENEMIES:
+        elif self.state == ENEMY_ACTION:
             self._party_status.blit(screen.screen)
-            self._combat_log.hide(screen.screen)
-            self._combat_log.clear()
-            self.state = INPUT
+            if state_perc >= 1.0:
+                self._combat_log.append(' and just looks confused.')
+                self._combat_log.blit(screen.screen)
+
+                self.state = ENEMY_PAUSE
+                self.state_duration = 0.8
+
+        elif self.state == ENEMY_ATTACK:
+            self.draw_enemy_attack(screen, state_perc, time)
+        elif self.state == ENEMY_PAUSE:
+            self.enemy_pause(screen, state_perc, time)
         elif self.state == WIN:
             pass
 
@@ -151,7 +161,9 @@ class Fight(object):
         screen.screen.fill(black, (box_start_point + box_size))
 
         if opener_perc > 1:
+            self.last_actioner = self.action_order.pop(0)
             self.state = INPUT
+            self._combat_log.hide(screen.screen)
             for idx in range(len(self.enemies)):
                 enemy = self.enemies[idx]
                 enemy.blit(screen.screen, idx, len(self.enemies))
@@ -197,14 +209,10 @@ class Fight(object):
             return
 
         attack_menu = self._menus.pop()
-        self.active_pc_idx += 1
-        if self.active_pc_idx == len(self.party.members):
-            #last attacker - enemies fight back
-            self.active_pc_idx = 0
-            self.state = ENEMIES
-            for idx in range(len(self.enemies)):
-                enemy = self.enemies[idx]
-                enemy.blit_if_alive(screen.screen, idx, len(self.enemies))
+        self.enqueue_character(screen, time)
+        for idx in range(len(self.enemies)):
+            enemy = self.enemies[idx]
+            enemy.blit_if_alive(screen.screen, idx, len(self.enemies))
 
         if self.is_over:
             self.state = WIN
@@ -243,9 +251,11 @@ class Fight(object):
         self.state_start = time
 
         self.attacked_enemy = self.enemies[self.attacked_enemy_pos]
-        attacker = self.party.members[self.active_pc_idx]
+        attacker = self.last_actioner[0]
         result = attacker.melee(self.attacked_enemy)
         self._combat_log.append(result["feedback"])
+        if self.attacked_enemy.alive == False:
+            self.action_order = filter(lambda x: x[0] != self.attacked_enemy, self.action_order)
 
         if result["action"] == 'hit':
             self._attack_result = HIT
@@ -263,14 +273,40 @@ class Fight(object):
     def generate_enemy_select_menu(self, time, action_type):
         self._menus.append(EnemySelectionMenu(time, self.enemies, action_type))
 
-    def generate_round_order(self):
-        alive_func = lambda fighter: fighter.alive
-        all_fighters = filter(alive_func, self.party.members) + \
-            filter(alive_func, self.enemies)
+    def enqueue_character(self, screen, time):
+        actioner = self.last_actioner[0]
+        if actioner.alive:
+            self.action_order.append([actioner, actioner.get_wait_time(None)])
+            self.action_order.sort(key=lambda x:x[1])
 
-        random.shuffle(all_fighters)
-        self.order = all_fighters
-        self.order_idx = 0
+        self.last_actioner = self.action_order.pop(0)
+        wait_time = self.last_actioner[1]
+        self.action_order = map(lambda x: [x[0], x[1] - wait_time], self.action_order)
+
+        self.state_start = time
+        self._combat_log.clear()
+        if isinstance(self.last_actioner[0], pc.PC):
+            self.state = INPUT
+            self._combat_log.hide(screen.screen)
+        else:
+            self.state = ENEMY_ACTION
+            self.state_duration = 0.3
+
+            self._combat_log.append('%s turns to you...' % (self.last_actioner[0].name))
+            self._combat_log.blit(screen.screen)
+
+    def draw_enemy_attack(self, screen, state_perc, time):
+        if state_perc >= 1.0:
+            self.state = ENEMY_PAUSE
+            self.state_duration = 0.5
+            self.state_start = time
+            return
+
+    def enemy_pause(self, screen, state_perc, time):
+        if state_perc >= 1.0:
+            self._combat_log.clear()
+            self.enqueue_character(screen, time)
+            return
 
     @property
     def is_over(self):

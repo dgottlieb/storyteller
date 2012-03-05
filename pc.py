@@ -107,3 +107,7 @@ class PC(object):
     @property
     def alive(self):
         return self.hp > 0
+
+    def get_wait_time(self, last_action):
+        last_action_delay = 0
+        return int(random.normalvariate(50 - (self.agi / 5), 5)) + last_action_delay
