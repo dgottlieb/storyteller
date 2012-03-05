@@ -94,12 +94,11 @@ MISS = 2
 class Fight(object):
     def __init__(self, screen, start_time, party):
         self._start_time = start_time
-        self._center = (screen.width / 2, screen.height / 2)
 
         if random.random() > 0.5:
-            self._enemies = [enemies.Karon()]
+            self.enemies = [enemies.Karon()]
         else:
-            self._enemies = [enemies.Karon(), enemies.Karon()]
+            self.enemies = [enemies.Karon(), enemies.Karon()]
 
         seconds_for_opener = 0.5
         self.state = OPENER
@@ -115,6 +114,9 @@ class Fight(object):
         self.attacked_enemy_pos = -1
         self.party = party
         self.active_pc_idx = 0
+
+        self.round = 0
+        self.generate_round_order()
 
     def draw(self, screen, time):
         state_perc = (1.0 * time - self.state_start) / self.state_duration / 1000
@@ -140,17 +142,19 @@ class Fight(object):
             pass
 
     def draw_opener(self, screen, opener_perc):
+        center = (screen.width / 2, screen.height / 2)
+
         box_size = (screen.width * opener_perc, screen.height * opener_perc)
-        box_start_point = (self._center[0] * (1 - opener_perc),
-                           self._center[1] * (1 - opener_perc))
+        box_start_point = (center[0] * (1 - opener_perc),
+                           center[1] * (1 - opener_perc))
 
         screen.screen.fill(black, (box_start_point + box_size))
 
         if opener_perc > 1:
             self.state = INPUT
-            for idx in range(len(self._enemies)):
-                enemy = self._enemies[idx]
-                enemy.blit(screen.screen, idx, len(self._enemies))
+            for idx in range(len(self.enemies)):
+                enemy = self.enemies[idx]
+                enemy.blit(screen.screen, idx, len(self.enemies))
 
     def draw_attack(self, screen, state_perc, time):
         for menu in self._menus:
@@ -183,9 +187,9 @@ class Fight(object):
 
             to_blit = (time - self.state_start) % 200 < 100
             if to_blit:
-                self.attacked_enemy.blit(screen.screen, self.attacked_enemy_pos, len(self._enemies))
+                self.attacked_enemy.blit(screen.screen, self.attacked_enemy_pos, len(self.enemies))
             else:
-                self.attacked_enemy.hide(screen.screen, self.attacked_enemy_pos, len(self._enemies))
+                self.attacked_enemy.hide(screen.screen, self.attacked_enemy_pos, len(self.enemies))
 
             return
 
@@ -198,9 +202,9 @@ class Fight(object):
             #last attacker - enemies fight back
             self.active_pc_idx = 0
             self.state = ENEMIES
-            for idx in range(len(self._enemies)):
-                enemy = self._enemies[idx]
-                enemy.blit_if_alive(screen.screen, idx, len(self._enemies))
+            for idx in range(len(self.enemies)):
+                enemy = self.enemies[idx]
+                enemy.blit_if_alive(screen.screen, idx, len(self.enemies))
 
         if self.is_over:
             self.state = WIN
@@ -211,8 +215,8 @@ class Fight(object):
             sounds.stop_music()
             sounds.win_battle_sound.play()
 
-            total_gold = sum(map(lambda x: x.gold, self._enemies))
-            total_exp = sum(map(lambda x: x.exp, self._enemies))
+            total_gold = sum(map(lambda x: x.gold, self.enemies))
+            total_exp = sum(map(lambda x: x.exp, self.enemies))
 
             self.party.add_gold(total_gold)
             self.party.add_exp(total_exp)
@@ -227,18 +231,18 @@ class Fight(object):
         self.state = ATTACK
         self.state_start = time
 
-        for enemy in self._enemies[:enemy_pos+1]:
+        for enemy in self.enemies[:enemy_pos+1]:
             if enemy.alive == False:
                 enemy_pos += 1
 
         self.attacked_enemy_pos = enemy_pos
-        self._attack_log_line = "You attack %s..." % (self._enemies[enemy_pos].name,)
+        self._attack_log_line = "You attack %s..." % (self.enemies[enemy_pos].name,)
 
     def attack_result(self, time):
         self.state = ATTACK_RESULT
         self.state_start = time
 
-        self.attacked_enemy = self._enemies[self.attacked_enemy_pos]
+        self.attacked_enemy = self.enemies[self.attacked_enemy_pos]
         attacker = self.party.members[self.active_pc_idx]
         result = attacker.melee(self.attacked_enemy)
         self._combat_log.append(result["feedback"])
@@ -257,11 +261,20 @@ class Fight(object):
             self._sound_channel.queue(sounds.dodge_sound)
 
     def generate_enemy_select_menu(self, time, action_type):
-        self._menus.append(EnemySelectionMenu(time, self._enemies, action_type))
+        self._menus.append(EnemySelectionMenu(time, self.enemies, action_type))
+
+    def generate_round_order(self):
+        alive_func = lambda fighter: fighter.alive
+        all_fighters = filter(alive_func, self.party.members) + \
+            filter(alive_func, self.enemies)
+
+        random.shuffle(all_fighters)
+        self.order = all_fighters
+        self.order_idx = 0
 
     @property
     def is_over(self):
-        return all(map(lambda x: x.alive == False, self._enemies))
+        return all(map(lambda x: x.alive == False, self.enemies))
 
 class EnemySelectionMenu(menu.BaseMenu):
     def __init__(self, start_time, enemies, action_type):

@@ -103,3 +103,7 @@ class PC(object):
         enemy.attacked(damage)
         return {"action": "hit", "damage": damage,
                 "feedback": "You hit %s for %d!" % (enemy.name, damage)}
+
+    @property
+    def alive(self):
+        return self.hp > 0
